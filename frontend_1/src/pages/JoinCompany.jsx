@@ -5,6 +5,7 @@ import { CheckCircle2, ChevronRight, ChevronLeft, AlertCircle } from "lucide-rea
 import { useNavigate, Link } from "react-router-dom";
 import OTPModal from "../components/OTPModal";
 import StatusModal from "../components/StatusModal";
+import SuccessModal from "../components/SuccessModal";
 
 const JOIN_STEPS = ["Basic Details", "Company Info", "Online Presence", "Account Setup"];
 
@@ -19,6 +20,7 @@ const JoinCompany = () => {
 	const [adminOtpVerified, setAdminOtpVerified] = useState(false);
 	const [showErrorBanner, setShowErrorBanner] = useState(false);
 	const [showStatusModal, setShowStatusModal] = useState(false);
+	const [showSuccessModal, setShowSuccessModal] = useState(false);
 	const [statusConfig, setStatusConfig] = useState({ type: "success", title: "", message: "" });
 	const [additionalLinks, setAdditionalLinks] = useState([]);
 
@@ -324,13 +326,7 @@ const JoinCompany = () => {
 
 			if (dbError) throw dbError;
 
-			setStatusConfig({
-				type: "success",
-				title: "Application Submitted!",
-				message: "Your company application has been successfully submitted! ✅\nOur team will review it and get back to you soon."
-			});
-			setShowStatusModal(true);
-			// Navigation will happen when they click "Continue" in the modal
+			setShowSuccessModal(true);
 		} catch (error) {
 			console.error(error);
 			setStatusConfig({
@@ -819,15 +815,14 @@ const JoinCompany = () => {
 			/>
 			<StatusModal
 				isOpen={showStatusModal}
-				onClose={() => {
-					setShowStatusModal(false);
-					if (statusConfig.title === "Application Submitted!") {
-						navigate('/company-dashboard');
-					}
-				}}
+				onClose={() => setShowStatusModal(false)}
 				type={statusConfig.type}
 				title={statusConfig.title}
 				message={statusConfig.message}
+			/>
+			<SuccessModal 
+				isOpen={showSuccessModal} 
+				role="company" 
 			/>
 		</div>
 	);

@@ -5,6 +5,7 @@ import { CheckCircle2, ChevronRight, ChevronLeft, AlertCircle } from "lucide-rea
 import { useNavigate, Link } from "react-router-dom";
 import OTPModal from "../components/OTPModal";
 import StatusModal from "../components/StatusModal";
+import SuccessModal from "../components/SuccessModal";
 
 const JOIN_STEPS = ["Basic Info", "Experience", "Skills", "Pricing", "Account Setup"];
 
@@ -17,6 +18,7 @@ const JoinExpert = () => {
 	const [showOtpModal, setShowOtpModal] = useState(false);
 	const [showErrorBanner, setShowErrorBanner] = useState(false);
 	const [showStatusModal, setShowStatusModal] = useState(false);
+	const [showSuccessModal, setShowSuccessModal] = useState(false);
 	const [statusConfig, setStatusConfig] = useState({ type: "success", title: "", message: "" });
 
 	const {
@@ -238,13 +240,7 @@ const JoinExpert = () => {
 
 			if (dbError) throw dbError;
 
-			setStatusConfig({
-				type: "success",
-				title: "Application Submitted!",
-				message: "Your expert application has been successfully submitted! 🎉\nWelcome to CXOConnect."
-			});
-			setShowStatusModal(true);
-			// Navigation will happen when they click "Continue" in the modal
+			setShowSuccessModal(true);
 		} catch (error) {
 			console.error(error);
 			setStatusConfig({
@@ -619,15 +615,14 @@ const JoinExpert = () => {
 			/>
 			<StatusModal
 				isOpen={showStatusModal}
-				onClose={() => {
-					setShowStatusModal(false);
-					if (statusConfig.title === "Application Submitted!") {
-						navigate('/expert-dashboard');
-					}
-				}}
+				onClose={() => setShowStatusModal(false)}
 				type={statusConfig.type}
 				title={statusConfig.title}
 				message={statusConfig.message}
+			/>
+			<SuccessModal 
+				isOpen={showSuccessModal} 
+				role="expert" 
 			/>
 		</div>
 	);
