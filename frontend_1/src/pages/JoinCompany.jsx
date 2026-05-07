@@ -96,7 +96,7 @@ const JoinCompany = () => {
 		} else if (currentStep === 1) {
 			fieldsToValidate = ["about", "orgType", "orgSize", "companyAge"];
 		} else if (currentStep === 2) {
-			fieldsToValidate = ["website", "email", "contactNumber", "linkedin", "github"];
+			fieldsToValidate = ["website", "email", "contactNumber", "linkedin"];
 		}
 
 		const isStepValid = await trigger(fieldsToValidate);
@@ -310,7 +310,10 @@ const JoinCompany = () => {
 							admin_name: data.adminName,
 							admin_email: data.adminEmail,
 							gstin: data.gstin,
-							company_handle: data.companyHandle,
+							cin_number: data.cinNumber,
+							contact_number: data.contactNumber,
+							company_age: data.companyAge,
+							linkedin: data.linkedin,
 							additional_links: additionalLinks
 						},
 					]);
@@ -318,6 +321,8 @@ const JoinCompany = () => {
 			} catch (e) {
 				dbError = null; // Catch to allow offline test
 			}
+
+			if (dbError) throw dbError;
 
 			setStatusConfig({
 				type: "success",
@@ -615,15 +620,6 @@ const JoinCompany = () => {
 										})}
 									/>
 									{errors.linkedin && <span className="text-red-500 text-xs font-medium mt-1 animate-pulse">{errors.linkedin.message}</span>}
-								</div>
-
-								<div className="group flex flex-col gap-1.5 mb-4">
-									<label className="text-sm font-semibold text-gray-700 group-focus-within:text-teal-600 transition-colors duration-150">GitHub URL (Optional)</label>
-									<input
-										className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 focus:bg-white focus:scale-[1.01] transition-all duration-200 ease-in-out text-gray-800"
-										placeholder="https://github.com/yourcompany"
-										{...register("github")}
-									/>
 								</div>
 
 								{/* Additional Links Section */}
