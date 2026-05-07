@@ -25,7 +25,7 @@ const Footer = () => {
 
     const containerVariants = {
         hidden: { opacity: 0 },
-        visible: { 
+        visible: {
             opacity: 1,
             transition: { staggerChildren: 0.1, delayChildren: 0.2 }
         }
@@ -43,7 +43,7 @@ const Footer = () => {
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0eb59a]/10 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#134e40]/20 rounded-full blur-[100px] pointer-events-none"></div>
 
-            <motion.div 
+            <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -52,22 +52,22 @@ const Footer = () => {
             >
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 mb-20">
                     <motion.div variants={itemVariants} className="lg:col-span-4 max-w-md">
-                        <div 
-                            className="inline-block cursor-pointer mb-8 group flex items-center shrink-0" 
+                        <div
+                            className="inline-block cursor-pointer mb-8 group flex items-center shrink-0"
                             onClick={(e) => handleNavigation(e, '/')}
                         >
-                            <img 
-                                src="/assets/images/LOGO_WHITE.png" 
-                                alt="CXO Connect" 
+                            <img
+                                src="/assets/images/LOGO_WHITE.png"
+                                alt="CXO Connect"
                                 className="h-10 md:h-12 w-auto object-contain"
                             />
                         </div>
                         <p className="text-gray-400 text-lg leading-relaxed font-light mb-10 transition-colors">
-                            The premier two-sided marketplace connecting forward-thinking companies with vetted senior professionals. When you need experience, not headcount.
+                            Bridging the gap between visionary companies and the senior leaders who bring their stories to life.
                         </p>
                         <div className="flex gap-4">
                             {[Twitter, Facebook, Instagram].map((Icon, idx) => (
-                                <motion.div 
+                                <motion.div
                                     key={idx}
                                     whileHover={{ y: -5, scale: 1.1 }}
                                     className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer text-gray-400 hover:text-[#0eb59a] hover:bg-white/10 hover:border-[#0eb59a]/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(14,181,154,0.2)] backdrop-blur-sm"

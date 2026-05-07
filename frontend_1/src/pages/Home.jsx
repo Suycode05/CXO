@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Twitter, Facebook, Instagram, Briefcase, ChevronLeft, ChevronRight, CheckCircle2, Check, UserPlus, Star, Shield, Target, Edit, Search, Lock, Monitor, Users, MapPin, Mail } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Briefcase, ChevronLeft, ChevronRight, CheckCircle2, Check, UserPlus, Star, Shield, Target, Edit, Search, Lock, Monitor, Users, MapPin, Mail, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthModal } from '../components/AuthModalContext';
 import Footer from '../components/Footer';
@@ -99,10 +99,10 @@ const Home = () => {
                 >
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold tracking-tight mb-8 leading-[1.1] text-[#111827]">
-                        Elite Expertise.<br /><span className="text-[#134e40]">Scalable Leadership.</span>
+                        Elite Expertise.<br /><span className="text-[#134e40]">Leadership on Demand.</span>
                     </h1>
                     <p className="text-lg md:text-2xl text-gray-600 font-light max-w-3xl mx-auto mb-12 leading-relaxed">
-                        The premier two-sided marketplace connecting forward-thinking companies with verified senior professionals.
+                        Connect with vetted CXOs and senior advisors to solve your most critical business challenges on demand and managed by experts.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
                         <button onClick={openModal} className="px-10 py-4 rounded-full bg-[#134e40] text-white font-semibold text-lg hover:bg-[#0eb59a] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto flex items-center justify-center gap-2 group">
@@ -119,8 +119,8 @@ const Home = () => {
             {/* Trusted by Industry Leaders */}
             <div className="py-16 bg-white border-b border-gray-100 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">Trusted by Industry Leaders</h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Our team has been fortunate to work with these prestigious companies in their recruitment journey</p>
+                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">Your Expertise, Your Terms.</h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Join an exclusive ecosystem of industry leaders. Access high-impact advisory projects with guaranteed milestone-based payouts.</p>
                 </div>
 
                 {/* Marquee Container */}
@@ -146,22 +146,23 @@ const Home = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 mt-12 text-center">
-                    <p className="text-gray-500 text-lg"><span className="font-bold text-blue-900">700+</span> companies trust our proven recruitment frameworks</p>
+                    <p className="text-gray-500 text-lg"><span className="font-bold text-blue-900">50+</span> companies trust our proven recruitment frameworks</p>
                 </div>
             </div>
 
-            {/* Dark Green Impact Section (Updated Content for Two-Sided Marketplace) */}
+            {/* Dark Green Impact Section (Updated Content for Two-Sided Marketplace) */} 
             <AnimatedSection className="py-24 px-6 max-w-7xl mx-auto">
                 <div className="bg-[#134e40] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row shadow-2xl relative group">
                     <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 blur-[100px] rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-1000"></div>
                     <div className="flex-1 p-12 md:p-16 flex flex-col justify-center relative z-10">
                         <div className="flex items-center gap-2 text-yellow-400 mb-8">
-                            <Star size={16} fill="currentColor" />
-                            <Star size={16} fill="currentColor" />
-                            <Star size={16} fill="currentColor" />
-                            <Star size={16} fill="currentColor" />
-                            <Star size={16} fill="currentColor" />
                             <span className="text-white/80 text-sm font-medium ml-2 tracking-wider uppercase">Trusted Ecosystem</span>
+                            <Star size={16} fill="currentColor" />
+                            <Star size={16} fill="currentColor" />
+                            <Star size={16} fill="currentColor" />
+                            <Star size={16} fill="currentColor" />
+                            <Star size={16} fill="currentColor" />
+                            
                         </div>
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-8 leading-[1.1]">
                             The premier <br className="hidden md:block" />two-sided marketplace.
@@ -473,7 +474,7 @@ const Home = () => {
 
                         <h2 className="text-4xl md:text-6xl text-gray-900 font-serif font-bold tracking-tight">Be a part of our story.</h2>
                     </div>
-                    <p className="text-gray-600 text-xl max-w-md md:text-right font-light">Step into our ecosystem to find how you fit in the next generation of fractional leadership.</p>
+                    <p className="text-gray-600 text-xl max-w-md md:text-right font-light">A high-trust ecosystem for managed consulting, interim leadership, and strategic transformation.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -482,7 +483,7 @@ const Home = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
                             <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop" alt="Companies" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
                             <div className="absolute bottom-0 left-0 p-10 z-20 w-full">
-                                <h4 className="text-4xl text-white mb-3 font-semibold group-hover:text-[#0eb59a] transition-colors">Enterprise Gateway</h4>
+                                <h4 className="text-4xl text-white mb-3 font-semibold group-hover:text-[#0eb59a] transition-colors">Hire a CXO</h4>
                                 <p className="text-gray-300 mb-8 text-lg font-light">Find top-tier fractional executives.</p>
                                 <button className="bg-white text-[#134e40] px-8 py-3 rounded-full font-bold text-sm group-hover:bg-[#0eb59a] group-hover:text-white transition-colors shadow-lg">
                                     Join as Company
@@ -497,7 +498,7 @@ const Home = () => {
                             {/* Fixed image URL for Experts */}
                             <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" alt="Experts" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
                             <div className="absolute bottom-0 left-0 p-10 z-20 w-full">
-                                <h4 className="text-4xl text-white mb-3 font-semibold group-hover:text-[#0eb59a] transition-colors">Expert Gateway</h4>
+                                <h4 className="text-4xl text-white mb-3 font-semibold group-hover:text-[#0eb59a] transition-colors">Executive Opportunities</h4>
                                 <p className="text-gray-300 mb-8 text-lg font-light">Discover flexible, high-impact engagements.</p>
                                 <button className="bg-white text-[#134e40] px-8 py-3 rounded-full font-bold text-sm group-hover:bg-[#0eb59a] group-hover:text-white transition-colors shadow-lg">
                                     Join as Expert
@@ -592,14 +593,15 @@ const Home = () => {
                 onClose={() => setShowToast(false)} 
             />
 
-            {/* Chat Bubble Sleek */}
+            {/* Ask Tars Chat Bubble */}
             <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                style={{ position: 'fixed', bottom: '30px', right: '30px', backgroundColor: '#0eb59a', color: '#ffffff', padding: '16px 32px', cursor: 'pointer', zIndex: 1000 }}
-                className="hover:-translate-y-1 transition-all flex items-center justify-center font-bold tracking-widest text-sm uppercase shadow-2xl rounded-sm"
+                style={{ position: 'fixed', bottom: '30px', right: '30px', backgroundColor: '#000000', color: '#ffffff', cursor: 'pointer', zIndex: 1000 }}
+                className="hover:-translate-y-1 transition-all flex items-center justify-center gap-3 px-6 py-4 shadow-2xl rounded-full border border-gray-800 group"
             >
-                CHAT WITH US
+                <Crown size={24} className="text-white group-hover:scale-110 transition-transform" />
+                <span className="font-bold tracking-widest text-sm uppercase">Ask Tars</span>
             </motion.div>
         </div>
     );
