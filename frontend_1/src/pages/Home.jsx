@@ -87,9 +87,23 @@ const Home = () => {
         <div className="bg-[#fafafa] min-h-screen text-gray-900 font-sans selection:bg-[#0eb59a] selection:text-white pt-20">
             {/* Hero Section */}
             <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-white">
-                <div className="absolute inset-0 z-0">
-                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop" alt="Hero Background" className="w-full h-full object-cover opacity-40 mix-blend-multiply" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/60 to-white"></div>
+                <div className="absolute inset-0 z-0 bg-white">
+                    <video 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline
+                        disablePictureInPicture
+                        className="w-full h-full object-cover opacity-80"
+                        onEnded={(e) => { e.target.play(); }}
+                    >
+                        <source src="/assets/videos/hero-background.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    {/* Very subtle overlay to smooth out the video */}
+                    <div className="absolute inset-0 bg-white/10"></div>
+                    {/* Fade to white ONLY at the very bottom edge to blend with the next section */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
                 </div>
 
                 <motion.div

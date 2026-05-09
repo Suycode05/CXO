@@ -21,7 +21,9 @@ if (supabaseUrl && supabaseAnonKey) {
     },
     auth: { 
       signInWithOtp: async () => ({ user: null, error: null }),
-      signInWithOAuth: async () => ({ data: null, error: new Error('Supabase is not configured') })
+      signInWithOAuth: async () => ({ data: null, error: new Error('Supabase is not configured') }),
+      getSession: async () => ({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
     },
   };
 }

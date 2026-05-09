@@ -8,13 +8,18 @@ import PrivacyDoc from './pages/PrivacyDoc';
 import TermsOfService from './pages/TermsOfService';
 import CompanyDashboard from './pages/CompanyDashboard';
 import ExpertDashboard from './pages/ExpertDashboard';
+import Requirements from './pages/Requirements';
+import CreateRequirement from './pages/CreateRequirement';
+import ExpertDiscovery from './pages/ExpertDiscovery';
+import ExpertProfile from './pages/ExpertProfile';
+import EngagementWorkspace from './pages/EngagementWorkspace';
 import { AuthModalProvider } from './components/AuthModalContext';
 import AuthModal from './components/AuthModal';
 
 const AppContent = () => {
   const location = useLocation();
   const showNavbar = location.pathname === '/' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service';
-  const isDashboard = location.pathname === '/company-dashboard' || location.pathname === '/expert-dashboard';
+  const isDashboard = location.pathname === '/company-dashboard' || location.pathname === '/expert-dashboard' || location.pathname === '/requirements' || location.pathname === '/requirements/create' || location.pathname === '/experts' || location.pathname.startsWith('/experts/') || location.pathname.startsWith('/engagements');
 
   return (
     <AuthModalProvider>
@@ -28,10 +33,15 @@ const AppContent = () => {
             <Route path="/join-expert" element={<JoinExpert />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/company-dashboard" element={<CompanyDashboard />} />
+            <Route path="/requirements" element={<Requirements />} />
+            <Route path="/requirements/create" element={<CreateRequirement />} />
+            <Route path="/experts" element={<ExpertDiscovery />} />
+            <Route path="/experts/:expertId" element={<ExpertProfile />} />
+            <Route path="/engagements/:engagementId" element={<EngagementWorkspace />} />
+            <Route path="/engagements" element={<EngagementWorkspace />} />
             <Route path="/expert-dashboard" element={<ExpertDashboard />} />
             <Route path="/privacy-policy" element={<PrivacyDoc />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/expert-dashboard" element={<ExpertDashboard />} />
           </Routes>
         </main>
       </div>
