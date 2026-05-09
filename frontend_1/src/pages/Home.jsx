@@ -76,7 +76,7 @@ const Home = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev === maxSlide ? 0 : prev + 1));
-        }, 5000); // Automatically slide every 5 seconds
+        }, 8000); // Automatically slide every 8 seconds
         return () => clearInterval(timer);
     }, [maxSlide]);
 
