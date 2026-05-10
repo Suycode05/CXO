@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, X, Send } from 'lucide-react';
-import { HfInference } from '@huggingface/inference';
 
 const TarsChatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -44,38 +43,37 @@ const TarsChatbot = () => {
         setIsLoading(true);
 
         try {
-            // Get base URL from environment, fallback to current origin if on hosting, or localhost:5001 for local dev
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 
-                             (window.location.hostname === 'localhost' ? "http://localhost:5001" : window.location.origin);
-            
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
             let loadingInterval = setInterval(() => {
                 setLoadingText(loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)]);
             }, 1500);
 
-            // Filter out the initial greeting and map to the format expected by the backend
-            const filteredMessages = messagesRef.current
+            // Map previous messages using the ref to absolutely guarantee no stale context
+            const formattedMessages = messagesRef.current
                 .filter(m => m.role !== 'assistant' || m.content !== 'Welcome! I am TARS, here to guide you to the right expertise. What can I help with today?')
                 .map(m => ({ role: m.role, content: m.content }));
+            
+            formattedMessages.push({ role: "user", content: userMessage });
 
-            const response = await fetch(`${apiBaseUrl}/api/chatbot`, {
-                method: 'POST',
+            const response = await fetch(`${baseUrl}/api/chat/completions`, {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ 
-                    messages: [...filteredMessages, { role: "user", content: userMessage }]
-                }),
+                body: JSON.stringify({ messages: formattedMessages })
             });
 
-            clearInterval(loadingInterval);
-
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to get response from AI");
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server error: ${response.status}`);
             }
 
             const data = await response.json();
-            setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
+            
+            clearInterval(loadingInterval);
+            
+            setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
         } catch (error) {
             console.error("Error generating response:", error);
             const errorMessage = error instanceof Error ? error.message : String(error);
