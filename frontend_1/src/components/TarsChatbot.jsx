@@ -43,7 +43,7 @@ const TarsChatbot = () => {
         setIsLoading(true);
 
         try {
-            const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+            const baseUrl = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/$/, "");
 
             let loadingInterval = setInterval(() => {
                 setLoadingText(loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)]);
