@@ -34,10 +34,8 @@ let supabase;
 if (supabaseUrl && supabaseAnonKey) {
   const client = createClient(supabaseUrl, supabaseAnonKey);
   // Wrap the real client's auth with our mock auth for temporary access
-  supabase = {
-    ...client,
-    auth: createMockAuth(client.auth)
-  };
+  Object.defineProperty(client, 'auth', { value: createMockAuth(client.auth) });
+  supabase = client;
 } else {
   console.warn('Supabase environment variables not set – using mock client');
   supabase = {
