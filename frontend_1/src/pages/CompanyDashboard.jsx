@@ -124,14 +124,14 @@ const CompanyDashboard = () => {
         navigate('/signin?role=company');
         return;
       }
-      
+
       try {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/company/profile`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setCompanyProfile(data);
@@ -143,7 +143,7 @@ const CompanyDashboard = () => {
         const { data: reqData, error: reqError } = await supabase
           .from('company_requirements')
           .select('*');
-        
+
         if (!reqError && reqData) {
           setRequirementsCount(reqData.filter(r => r.status === 'Active').length || 0);
           setActiveEngagementsCount(reqData.filter(r => r.status === 'Active').length || 0);
@@ -165,14 +165,14 @@ const CompanyDashboard = () => {
     return () => { if (authListener?.subscription) authListener.subscription.unsubscribe(); };
   }, [navigate]);
 
-  const sidebarMenu = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/company-dashboard' },
-    { name: 'My Requirements', icon: Briefcase, path: '/requirements', badge: requirementsCount.toString() },
-    { name: 'Experts', icon: Users, path: '/experts' },
-    { name: 'Payments', icon: CreditCard, path: '/payments' },
-    { name: 'Analytics', icon: BarChart2, path: '/analytics' },
-    { name: 'PMO Services', icon: ShieldCheck, path: '/pmo' },
-    { name: 'Settings', icon: Settings, path: '/settings' },
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/company-dashboard' },
+    { icon: FileText, label: 'My Requirements', path: '/requirements' },
+    { icon: Users, label: 'Experts', path: '/experts' },
+    { icon: CreditCard, label: 'Payments', path: '/payments' },
+    { icon: BarChart2, label: 'Analytics', path: '/analytics' },
+    { icon: ShieldCheck, label: 'PMO Services', path: '/pmo' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   const notifications = [
@@ -282,15 +282,16 @@ const CompanyDashboard = () => {
             Main Menu
           </motion.p>
 
-          {sidebarMenu.map((item, idx) => {
-            const isActive = activeMenu === item.name;
+          {navItems.map((item, idx) => {
+            const isActive = activeMenu === item.label;
+            const badge = item.label === 'My Requirements' ? '2' : null;
             return (
-              <div key={item.name} className="relative group">
+              <div key={item.label} className="relative group">
                 <motion.button
                   initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   whileHover={{ x: isSidebarOpen ? 3 : 0 }} whileTap={{ scale: 0.95 }}
-                  onClick={() => { setActiveMenu(item.name); navigate(item.path); if (window.innerWidth < 768) setIsMobileMenuOpen(false); }}
+                  onClick={() => { setActiveMenu(item.label); navigate(item.path); if (window.innerWidth < 768) setIsMobileMenuOpen(false); }}
                   className={`w-full flex items-center transition-colors duration-150 rounded-xl relative
                     ${isSidebarOpen ? 'gap-3 px-4 py-3' : 'justify-center px-0 py-3'}
                     ${isActive ? 'bg-teal-50 text-[#134e40]' : 'text-gray-400 hover:bg-[#134e40]/10 hover:text-gray-700'}`}
@@ -301,20 +302,20 @@ const CompanyDashboard = () => {
                   )}
                   <div className={`relative shrink-0 ${isActive ? 'text-[#0eb59a]' : 'text-gray-400 group-hover:text-gray-600'}`}>
                     <item.icon size={19} />
-                    {item.badge && (
+                    {badge && (
                       <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#0eb59a] text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-sm">
-                        {item.badge}
+                        {badge}
                       </span>
                     )}
                   </div>
                   <motion.span animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }} transition={{ duration: 0.2 }}
                     className="text-sm font-semibold overflow-hidden whitespace-nowrap">
-                    {item.name}
+                    {item.label}
                   </motion.span>
                 </motion.button>
                 {!isSidebarOpen && (
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-1.5 bg-[#0d1f2d] text-white text-xs font-bold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 shadow-xl">
-                    {item.name}
+                    {item.label}
                     <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#0d1f2d]" />
                   </div>
                 )}
