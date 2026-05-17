@@ -122,7 +122,7 @@ const CompanyDashboard = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) navigate('/signin?role=company');
     };
-    checkAuth();
+    checkAuthAndFetchProfile();
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) navigate('/signin?role=company');
     });
