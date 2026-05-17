@@ -337,7 +337,7 @@ const Requirements = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/company-dashboard' },
-    { icon: FileText, label: 'My Requirements', path: '/requirements', active: true },
+    { icon: FileText, label: 'My Requirements', path: '/requirements' },
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
@@ -384,38 +384,41 @@ const Requirements = () => {
           {isSidebarOpen && (
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
           )}
-          {navItems.map((item) => (
-            <motion.button
-              key={item.path}
-              whileHover={{ x: 2 }}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 group relative ${
-                item.active
-                  ? 'bg-[#134e40] text-white shadow-md'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-              }`}
-            >
-              {item.active && (
-                <motion.div
-                  layoutId="activeNavBar"
-                  className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
-                />
-              )}
-              <item.icon size={17} className="shrink-0" />
-              <motion.span
-                animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold"
+          {navItems.map((item) => {
+            const isActive = item.path === '/requirements';
+            return (
+              <motion.button
+                key={item.path}
+                whileHover={{ x: 2 }}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 group relative ${
+                  isActive
+                    ? 'bg-[#134e40] text-white shadow-md'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                }`}
               >
-                {item.label}
-              </motion.span>
-              {item.label === 'My Requirements' && isSidebarOpen && (
-                <span className="ml-auto bg-[#0eb59a] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-black">
-                  {stats.active}
-                </span>
-              )}
-            </motion.button>
-          ))}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavBar"
+                    className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                  />
+                )}
+                <item.icon size={17} className="shrink-0" />
+                <motion.span
+                  animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold"
+                >
+                  {item.label}
+                </motion.span>
+                {item.label === 'My Requirements' && isSidebarOpen && (
+                  <span className="ml-auto bg-[#0eb59a] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-black">
+                    {stats.active}
+                  </span>
+                )}
+              </motion.button>
+            );
+          })}
         </nav>
         <div className="flex-1" /> {/* spacer to push nav to top */}
 
