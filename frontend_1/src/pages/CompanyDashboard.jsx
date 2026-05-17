@@ -94,6 +94,8 @@ const CompanyDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3);
   const [mounted, setMounted] = useState(false);
+  const [companyProfile, setCompanyProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   // Carousel State
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -243,13 +245,19 @@ const CompanyDashboard = () => {
         {/* Logo */}
         <div className={`flex items-center border-b border-gray-100 overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'px-5 py-5 gap-3' : 'px-0 py-5 justify-center'}`}>
           <div className="relative w-9 h-9 shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center shadow-md">
-              <span className="text-white font-black text-sm">C</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center shadow-md overflow-hidden">
+              {companyProfile?.logo_url ? (
+                <img src={companyProfile.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-black text-sm">
+                  {companyProfile?.company_name ? companyProfile.company_name.charAt(0).toUpperCase() : 'C'}
+                </span>
+              )}
             </div>
           </div>
           <motion.div animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }} transition={{ duration: 0.2 }}
             className="overflow-hidden whitespace-nowrap">
-            <p className="text-sm font-black text-[#134e40] leading-tight">CXO Connect</p>
+            <p className="text-sm font-black text-[#134e40] leading-tight">{companyProfile?.company_name || 'CXO Connect'}</p>
             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Company Portal</p>
           </motion.div>
         </div>
@@ -545,10 +553,14 @@ const CompanyDashboard = () => {
             <motion.div
               whileHover={{ scale: 1.08, ringWidth: 2, ringColor: '#0eb59a', ringOffsetWidth: 2 }}
               whileTap={{ scale: 0.94 }}
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md transition-all duration-200"
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md transition-all duration-200 overflow-hidden"
               title="Account"
             >
-              AC
+              {companyProfile?.logo_url ? (
+                <img src={companyProfile.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                companyProfile?.company_name ? companyProfile.company_name.substring(0, 2).toUpperCase() : 'AC'
+              )}
             </motion.div>
           </div>
         </header>
@@ -580,7 +592,7 @@ const CompanyDashboard = () => {
                   <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
                     Good morning,{' '}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#134e40] to-[#0eb59a]">
-                      Acme Corp.
+                      {loadingProfile ? '...' : (companyProfile?.company_name || 'Acme Corp.')}
                     </span>{' '}
                     <motion.span animate={{ rotate: [0, 20, -10, 20, 0] }}
                       transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatDelay: 4 }} className="inline-block">
