@@ -30,6 +30,12 @@ const SignIn = () => {
 				const cleanEmail = identifier.trim();
 				console.log("🔍 Searching for company admin email:", `"${cleanEmail}"`);
 
+				if (cleanEmail === "demo@cxo.com") {
+					localStorage.setItem('demo_company', 'true');
+					navigate("/company-dashboard");
+					return;
+				}
+
 				const { data, error: dbError } = await supabase
 					.from("company_applications")
 					.select("admin_email")
@@ -47,21 +53,14 @@ const SignIn = () => {
 
 				const targetEmailForAuth = targetEmail || cleanEmail;
 				
-				if (targetEmailForAuth !== "demo@cxo.com") {
-					localStorage.removeItem('demo_company');
-					const { error: authError } = await supabase.auth.signInWithOtp({
-						email: targetEmailForAuth,
-					});
-					if (authError) throw authError;
+				localStorage.removeItem('demo_company');
+				const { error: authError } = await supabase.auth.signInWithOtp({
+					email: targetEmailForAuth,
+				});
+				if (authError) throw authError;
 
-					setMessage(`✅ OTP sent to ${targetEmailForAuth}`);
-					setShowOtp(true);
-				} else {
-					// 🚀 Bypass OTP for demo account
-					localStorage.setItem('demo_company', 'true');
-					navigate("/company-dashboard");
-					return;
-				}
+				setMessage(`✅ OTP sent to ${targetEmailForAuth}`);
+				setShowOtp(true);
 			} else {
 				// 👨‍💼 EXPERT LOGIN
 				const cleanIdentifier = identifier.trim();
