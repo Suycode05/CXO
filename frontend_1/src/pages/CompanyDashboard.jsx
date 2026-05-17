@@ -118,32 +118,9 @@ const CompanyDashboard = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/signin?role=company');
-        return;
-      }
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/company/profile`, {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setCompanyProfile(data);
-        } else {
-          console.error("Failed to fetch company profile");
-        }
-      } catch (error) {
-        console.error("Error fetching company profile:", error);
-      } finally {
-        setLoadingProfile(false);
-      }
+      if (!session) navigate('/signin?role=company');
     };
     checkAuthAndFetchProfile();
-
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session && !isDemo) {
         navigate('/signin?role=company');
@@ -738,8 +715,8 @@ const CompanyDashboard = () => {
                       key={i}
                       onClick={() => setCurrentIndex(i)}
                       className={`rounded-full transition-all duration-200 ${currentIndex === i
-                          ? 'w-4 h-2 bg-[#0eb59a]'
-                          : 'w-2 h-2 bg-gray-200 hover:bg-gray-300'
+                        ? 'w-4 h-2 bg-[#0eb59a]'
+                        : 'w-2 h-2 bg-gray-200 hover:bg-gray-300'
                         }`}
                     />
                   ))}

@@ -30,22 +30,29 @@ const SignIn = () => {
 				const cleanEmail = identifier.trim();
 				console.log("🔍 Searching for company admin email:", `"${cleanEmail}"`);
 
-				const { data, error: dbError } = await supabase
-					.from("company_applications")
-					.select("admin_email")
-					.eq("admin_email", cleanEmail)
-					.limit(1)
-					.maybeSingle();
+				if (cleanEmail === "demo@cxo.com") {
+					localStorage.setItem("sb-mock-auth", "true");
+					localStorage.setItem("mock-role", "company");
+					window.location.href = "/company-dashboard";
+					return;
+				} else {
+					const { data, error: dbError } = await supabase
+						.from("company_applications")
+						.select("admin_email")
+						.eq("admin_email", cleanEmail)
+						.limit(1)
+						.maybeSingle();
 
-				if (dbError || !data) {
-					console.error("DB Error:", dbError);
-					throw new Error("Company not found");
+					if (dbError || !data) {
+						console.error("DB Error:", dbError);
+						throw new Error("Company not found");
+					}
+
+					const targetEmail = data.admin_email?.trim();
+					setResolvedEmail(targetEmail);
 				}
 
-				const targetEmail = data.admin_email?.trim();
-				setResolvedEmail(targetEmail);
-
-				const targetEmailForAuth = targetEmail || cleanEmail;
+				const targetEmailForAuth = cleanEmail === "demo@cxo.com" ? cleanEmail : resolvedEmail || cleanEmail;
 				
 				if (targetEmailForAuth !== "demo@cxo.com") {
 					localStorage.removeItem('demo_company');
@@ -65,6 +72,12 @@ const SignIn = () => {
 			} else {
 				// 👨‍💼 EXPERT LOGIN
 				const cleanIdentifier = identifier.trim();
+				if (cleanIdentifier === "demo@cxo.com") {
+					localStorage.setItem("sb-mock-auth", "true");
+					localStorage.setItem("mock-role", "expert");
+					window.location.href = "/expert-dashboard";
+					return;
+				}
 				if (loginMethod === "otp") {
 					const { error } = await supabase.auth.signInWithOtp({
 						email: cleanIdentifier,

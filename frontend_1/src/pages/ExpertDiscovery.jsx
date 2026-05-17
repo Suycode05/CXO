@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +7,9 @@ import {
   ChevronRight, Heart, X, Check, SlidersHorizontal,
   Users, Briefcase, ArrowUpRight, MessageSquare,
   BarChart2, ChevronDown, ChevronUp, Zap, Shield,
-  Grid, List, RefreshCw
+  Grid, List, RefreshCw, Calendar, Award, TrendingUp,
+  CheckCircle, LayoutDashboard, CreditCard, FileText,
+  LogOut, Settings, ShieldCheck, Bell, ChevronLeft
 } from 'lucide-react';
 
 const ExpertDiscovery = () => {
@@ -54,6 +56,30 @@ const ExpertDiscovery = () => {
     location: [],
     experience: '',
   });
+
+  const [hoveredCardId, setHoveredCardId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const cardRefs = useRef({});
+
+  const getPanelSide = (expertId) => {
+    const cardEl = cardRefs.current[expertId];
+    if (!cardEl) return 'right';
+    const rect = cardEl.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const spaceRight = viewportWidth - rect.right;
+    const spaceLeft = rect.left;
+    return spaceRight >= spaceLeft ? 'right' : 'left';
+  };
+
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/company-dashboard' },
+    { icon: FileText, label: 'My Requirements', path: '/requirements' },
+    { icon: Users, label: 'Experts', path: '/experts', active: true },
+    { icon: CreditCard, label: 'Payments', path: '/payments' },
+    { icon: BarChart2, label: 'Analytics', path: '/analytics' },
+    { icon: ShieldCheck, label: 'PMO Services', path: '/pmo' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+  ];
 
   // ── DATA ──
   const experts = [
@@ -308,306 +334,242 @@ const ExpertDiscovery = () => {
 
   const getCompareExperts = () => compareTray.map(id => experts.find(e => e.id === id)).filter(Boolean);
 
-  return (
-    <div className="min-h-screen bg-[#f8fafc]">
-
-      {/* Background */}
-      <div className="fixed top-0 right-0 w-96 h-96 bg-teal-100/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 left-0 w-72 h-72 bg-blue-100/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative max-w-[1400px] mx-auto px-6 py-8 pb-32">
-
-        {/* ── PAGE HEADER ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <button
-                onClick={() => navigate('/company-dashboard')}
-                className="text-gray-400 hover:text-[#0eb59a] text-sm font-semibold transition-colors"
-              >
-                Dashboard
-              </button>
-              <ChevronRight size={14} className="text-gray-300" />
-              <span className="text-sm font-bold text-gray-700">Expert Discovery</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
-              Find Experts
-            </h1>
-            <p className="text-gray-400 text-sm mt-1">
-              {filteredExperts.length} vetted senior professionals available
-            </p>
+  const RadialRing = ({ percent, color, size = 56, stroke = 5, label }) => {
+    const radius = (size - stroke * 2) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percent / 100) * circumference;
+    return (
+      <div className="flex flex-col items-center gap-1">
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="-rotate-90">
+            <circle
+              cx={size / 2} cy={size / 2} r={radius}
+              fill="none"
+              stroke="#E3E8E4"
+              strokeWidth={stroke}
+            />
+            <motion.circle
+              cx={size / 2} cy={size / 2} r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: offset }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[10px] font-black text-[#1C3627]">{percent}%</span>
           </div>
+        </div>
+        <span className="text-[9px] font-semibold text-gray-400 text-center leading-tight max-w-[56px]">{label}</span>
+      </div>
+    );
+  };
 
-          {/* View Toggle + Filter Toggle */}
-          <div className="flex items-center gap-3">
-            <div className="flex bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
-              {[
-                { id: 'grid', icon: Grid },
-                { id: 'list', icon: List },
-              ].map(({ id, icon: Icon }) => (
-                <motion.button
-                  key={id}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setViewMode(id)}
-                  className={`p-2 rounded-lg transition-all ${viewMode === id ? 'bg-[#134e40] text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <Icon size={16} />
-                </motion.button>
-              ))}
-            </div>
-            {/* Mobile filter button — shows only on mobile */}
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border bg-white text-gray-600 border-gray-200 md:hidden"
-            >
-              <SlidersHorizontal size={15} />
-              Filters
-              {totalActiveFilters > 0 && (
-                <span className="bg-[#0eb59a] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-                  {totalActiveFilters}
-                </span>
-              )}
-            </motion.button>
+  return (
+    <div className="min-h-screen bg-[#f4f7f5]" style={{ backgroundColor: '#f4f7f5' }}>
 
-            {/* Desktop Filter toggle — hidden on mobile */}
+      {/* ── SIDEBAR — same as Requirements.jsx ── */}
+      <motion.aside
+        animate={{ width: isSidebarOpen ? 260 : 68 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        className="bg-white border-r border-gray-100 flex flex-col z-50 shadow-sm fixed left-0 top-0 h-screen overflow-hidden"
+      >
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-50">
+          <div className="w-9 h-9 bg-[#134e40] rounded-xl flex items-center justify-center shrink-0">
+            <span className="text-white font-black text-sm">C</span>
+          </div>
+          <motion.div
+            animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden whitespace-nowrap"
+          >
+            <p className="text-[#134e40] font-black text-sm leading-none">CXO Connect</p>
+            <p className="text-gray-400 text-[10px] mt-0.5">Company Portal</p>
+          </motion.div>
+          <motion.button
+            animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#134e40] hover:bg-gray-100 transition-all shrink-0"
+          >
+            {isSidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </motion.button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          {isSidebarOpen && (
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">Main Menu</p>
+          )}
+          {navItems.map((item) => (
             <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setShowFilters(!showFilters)}
-              className={`hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                showFilters
-                  ? 'bg-[#134e40] text-white border-[#134e40]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-[#0eb59a]/40'
+              key={item.path}
+              whileHover={{ x: 2 }}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 relative ${
+                item.active
+                  ? 'bg-[#134e40] text-white shadow-md'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
               }`}
             >
-              <SlidersHorizontal size={15} />
-              Filters
-              {totalActiveFilters > 0 && (
-                <span className="bg-[#0eb59a] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">
-                  {totalActiveFilters}
-                </span>
-              )}
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* ── SEARCH BAR ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="relative mb-6 group"
-        >
-          <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0eb59a] transition-colors" />
-          <input
-            type="text"
-            placeholder="Search by name, skill, role, or industry..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-13 pr-12 py-3.5 bg-white border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0eb59a]/20 focus:border-[#0eb59a]/40 transition-all shadow-sm"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-              <X size={16} />
-            </button>
-          )}
-        </motion.div>
-
-        {/* ── MAIN LAYOUT ── */}
-        <div className="flex gap-6">
-
-          {/* ── FILTER PANEL ── */}
-          <AnimatePresence>
-            {showFilters && (
-              <>
-                {/* Mobile backdrop */}
+              {item.active && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setShowFilters(false)}
-                  className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+                  layoutId="activeNavBar"
+                  className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
                 />
+              )}
+              <item.icon size={17} className="shrink-0" />
+              <motion.span
+                animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold"
+              >
+                {item.label}
+              </motion.span>
+            </motion.button>
+          ))}
+        </nav>
+      </motion.aside>
 
-                {/* Filter panel */}
-                <motion.aside
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className={`
-                    shrink-0 overflow-hidden
-                    fixed left-0 top-0 h-full z-50 w-72 md:static md:h-auto md:z-auto md:w-[260px]
-                    md:block
-                  `}
-                >
-                  <div className="w-full h-full md:h-auto bg-white md:rounded-3xl border border-gray-100 shadow-sm p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                    {/* Mobile close button */}
-                    <div className="flex items-center justify-between mb-4 md:hidden">
-                      <h3 className="font-black text-gray-900 text-sm">Filters</h3>
-                      <button onClick={() => setShowFilters(false)} className="p-1.5 rounded-lg bg-gray-100">
-                        <X size={16} />
-                      </button>
-                    </div>
+      {/* ── MAIN CONTENT ── */}
+      <div
+        className="flex flex-col min-h-screen"
+        style={{
+          marginLeft: isSidebarOpen ? 260 : 68,
+          transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)'
+        }}
+      >
 
-                  {/* Filter Header */}
-                  <div className="flex items-center justify-between mb-5">
-                    <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
-                      <Filter size={14} className="text-[#0eb59a]" /> Filters
-                    </h3>
-                    {totalActiveFilters > 0 && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        onClick={clearAllFilters}
-                        className="text-xs font-bold text-red-400 hover:text-red-600 flex items-center gap-1 transition-colors"
-                      >
-                        <RefreshCw size={11} /> Clear all
-                      </motion.button>
-                    )}
-                  </div>
-
-                  {/* Filter Sections */}
-                  <div className="space-y-4">
-                    {filterSections.map((section) => (
-                      <div key={section.id} className="border-b border-gray-50 pb-4">
-                        <button
-                          onClick={() => setExpandedFilter(expandedFilter === section.id ? null : section.id)}
-                          className="w-full flex items-center justify-between mb-3 group"
-                        >
-                          <span className="text-xs font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                            <section.icon size={13} className="text-[#0eb59a]" />
-                            {section.label}
-                            {activeFilters[section.id]?.length > 0 && (
-                              <span className="bg-[#0eb59a] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                                {activeFilters[section.id].length}
-                              </span>
-                            )}
-                          </span>
-                          {expandedFilter === section.id
-                            ? <ChevronUp size={14} className="text-gray-400" />
-                            : <ChevronDown size={14} className="text-gray-400" />}
-                        </button>
-
-                        <AnimatePresence>
-                          {expandedFilter === section.id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden space-y-2"
-                            >
-                              {section.options.map((option) => {
-                                const isActive = activeFilters[section.id]?.includes(option);
-                                return (
-                                  <motion.button
-                                    key={option}
-                                    whileHover={{ x: 3 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    onClick={() => toggleFilter(section.id, option)}
-                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                                      isActive
-                                        ? 'bg-teal-50 text-[#134e40] border border-teal-100'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                                    }`}
-                                  >
-                                    {option}
-                                    {isActive && (
-                                      <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        className="w-4 h-4 bg-[#0eb59a] rounded-full flex items-center justify-center"
-                                      >
-                                        <Check size={9} className="text-white" strokeWidth={3} />
-                                      </motion.div>
-                                    )}
-                                  </motion.button>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
-
-                    {/* Experience */}
-                    <div className="border-b border-gray-50 pb-4">
-                      <p className="text-xs font-black text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Zap size={13} className="text-[#0eb59a]" /> Experience
-                      </p>
-                      <div className="space-y-2">
-                        {experienceOptions.map(exp => (
-                          <motion.button
-                            key={exp}
-                            whileHover={{ x: 3 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={() => setActiveFilters(prev => ({ ...prev, experience: exp === 'Any' ? '' : exp }))}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                              (exp === 'Any' && !activeFilters.experience) || activeFilters.experience === exp
-                                ? 'bg-teal-50 text-[#134e40] border border-teal-100'
-                                : 'text-gray-500 hover:bg-gray-50'
-                            }`}
-                          >
-                            {exp}
-                            {((exp === 'Any' && !activeFilters.experience) || activeFilters.experience === exp) && (
-                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-4 h-4 bg-[#0eb59a] rounded-full flex items-center justify-center">
-                                <Check size={9} className="text-white" strokeWidth={3} />
-                              </motion.div>
-                            )}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Budget */}
-                    <div>
-                      <p className="text-xs font-black text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <DollarSign size={13} className="text-[#0eb59a]" /> Budget Range
-                      </p>
-                      <div className="space-y-2">
-                        {budgetOptions.map(bud => (
-                          <motion.button
-                            key={bud}
-                            whileHover={{ x: 3 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={() => setActiveFilters(prev => ({ ...prev, budget: bud === 'Any' ? '' : bud }))}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                              (bud === 'Any' && !activeFilters.budget) || activeFilters.budget === bud
-                                ? 'bg-teal-50 text-[#134e40] border border-teal-100'
-                                : 'text-gray-500 hover:bg-gray-50'
-                            }`}
-                          >
-                            {bud}
-                            {((bud === 'Any' && !activeFilters.budget) || activeFilters.budget === bud) && (
-                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-4 h-4 bg-[#0eb59a] rounded-full flex items-center justify-center">
-                                <Check size={9} className="text-white" strokeWidth={3} />
-                              </motion.div>
-                            )}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  </div>
-                </motion.aside>
-              </>
+        {/* ── TOP HEADER ── */}
+        <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-4 shadow-sm">
+          <div className="relative flex-1 max-w-lg">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name, skill, role, or industry..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:border-[#0eb59a] focus:ring-2 focus:ring-[#0eb59a]/15 transition-all"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <X size={14} />
+              </button>
             )}
-          </AnimatePresence>
+          </div>
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="relative">
+              <button className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 hover:text-[#134e40] transition-all">
+                <Bell size={17} />
+              </button>
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">3</span>
+            </div>
+            <button className="w-9 h-9 bg-[#134e40] rounded-xl flex items-center justify-center text-white text-xs font-black hover:ring-2 hover:ring-[#0eb59a] hover:ring-offset-2 transition-all">
+              AC
+            </button>
+          </div>
+        </header>
 
-          {/* ── EXPERT GRID ── */}
-          <div className="flex-1 min-w-0">
+        {/* ── PAGE BODY ── */}
+        <div className="flex-1">
+          <div className="px-8 pt-7 pb-32">
+
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-6">
+
+              {/* Left — Title + live stats */}
+              <div>
+                <h1 className="text-[28px] font-black text-[#1C3627] tracking-tight leading-none mb-3">
+                  Find Experts
+                </h1>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Live expert count */}
+                  <div className="flex items-center gap-1.5 bg-[#134e40] px-3 py-1.5 rounded-xl">
+                    <motion.div
+                      animate={{ scale: [1, 1.4, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-1.5 h-1.5 rounded-full bg-[#0eb59a]"
+                    />
+                    <span className="text-white text-xs font-bold">
+                      {filteredExperts.length} Verified Experts
+                    </span>
+                  </div>
+                  {/* Shortlisted count — only if any */}
+                  {shortlisted.length > 0 && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-1.5 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-xl"
+                    >
+                      <Heart size={11} className="text-rose-500" fill="currentColor" />
+                      <span className="text-rose-600 text-xs font-bold">
+                        {shortlisted.length} Shortlisted
+                      </span>
+                    </motion.div>
+                  )}
+                  {/* Compare count — only if any */}
+                  {compareTray.length > 0 && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl"
+                    >
+                      <BarChart2 size={11} className="text-blue-500" />
+                      <span className="text-blue-600 text-xs font-bold">
+                        {compareTray.length} Comparing
+                      </span>
+                    </motion.div>
+                  )}
+                  {/* Active filters count */}
+                  {totalActiveFilters > 0 && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-xl"
+                    >
+                      <SlidersHorizontal size={11} className="text-amber-500" />
+                      <span className="text-amber-600 text-xs font-bold">
+                        {totalActiveFilters} Filter{totalActiveFilters > 1 ? 's' : ''} Active
+                      </span>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right — Filters toggle button */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                  showFilters
+                    ? 'bg-[#134e40] text-white border-[#134e40]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#0eb59a]/40'
+                }`}
+              >
+                <SlidersHorizontal size={15} />
+                Filters
+                {totalActiveFilters > 0 && (
+                  <span className="bg-[#0eb59a] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                    {totalActiveFilters}
+                  </span>
+                )}
+              </motion.button>
+
+            </div>
 
             {/* Active filter chips */}
             {totalActiveFilters > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-wrap gap-2 mb-4"
+                className="flex flex-wrap gap-2 mb-5"
               >
                 {Object.entries(activeFilters).map(([key, val]) => {
                   if (!val || (Array.isArray(val) && val.length === 0)) return null;
@@ -617,16 +579,12 @@ const ExpertDiscovery = () => {
                       key={`${key}-${item}`}
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.8, opacity: 0 }}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 text-[#134e40] text-xs font-bold rounded-xl border border-teal-100"
                     >
                       {item}
                       <button onClick={() => {
-                        if (Array.isArray(activeFilters[key])) {
-                          toggleFilter(key, item);
-                        } else {
-                          setActiveFilters(prev => ({ ...prev, [key]: '' }));
-                        }
+                        if (Array.isArray(activeFilters[key])) toggleFilter(key, item);
+                        else setActiveFilters(prev => ({ ...prev, [key]: '' }));
                       }}>
                         <X size={11} />
                       </button>
@@ -636,262 +594,465 @@ const ExpertDiscovery = () => {
               </motion.div>
             )}
 
-            {/* Results count */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-bold text-gray-500">
-                Showing <span className="text-gray-900 font-black">{filteredExperts.length}</span> experts
-              </p>
-              <select className="text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0eb59a]/20">
-                <option>Best Match</option>
-                <option>Highest Rated</option>
-                <option>Most Reviews</option>
-                <option>Budget: Low to High</option>
-              </select>
-            </div>
+            {/* ── THREE COLUMN LAYOUT ── */}
+            <div className="flex gap-5">
 
-            {/* Grid / List view */}
-            <AnimatePresence mode="popLayout">
-              {filteredExperts.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-white rounded-3xl border border-gray-100 shadow-sm p-16 text-center"
-                >
-                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users size={24} className="text-gray-300" />
-                  </div>
-                  <h3 className="font-black text-gray-700 text-lg mb-2">No experts found</h3>
-                  <p className="text-gray-400 text-sm mb-4">Try adjusting your filters or search query</p>
-                  <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    onClick={clearAllFilters}
-                    className="px-5 py-2.5 bg-[#134e40] text-white text-sm font-bold rounded-xl"
+              {/* ── LEFT FILTER PANEL ── */}
+              <AnimatePresence>
+                {showFilters && (
+                  <motion.aside
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 240 }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className="shrink-0 overflow-hidden"
                   >
-                    Clear Filters
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <div className={viewMode === 'grid'
-                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5'
-                  : 'flex flex-col gap-4'
-                }>
-                  {filteredExperts.map((expert, idx) => (
-                    <motion.div
-                      key={expert.id}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.3, delay: idx * 0.05 }}
-                      whileHover={{ y: viewMode === 'grid' ? -6 : -2, boxShadow: '0 16px 40px rgba(0,0,0,0.08)' }}
-                      className={`bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group transition-all duration-300 ${viewMode === 'list' ? 'flex gap-0' : ''}`}
-                    >
-                      {viewMode === 'grid' ? (
-                        // ── GRID CARD ──
-                        <div className="p-5">
-                          {/* Top badges */}
-                          <div className="flex items-center gap-2 mb-4">
-                            {expert.topExpert && (
-                              <span className="flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
-                                <Star size={9} fill="currentColor" /> Top Expert
-                              </span>
-                            )}
-                            {expert.verified && (
-                              <span className="flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">
-                                <Shield size={9} /> Verified
-                              </span>
-                            )}
-                            <span className="ml-auto text-[10px] font-black text-[#134e40] bg-teal-50 px-2 py-1 rounded-lg border border-teal-100">
-                              {expert.match}% Match
-                            </span>
-                          </div>
+                    <div className="w-[240px] bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-4">
 
-                          {/* Avatar + Name */}
-                          <div className="flex items-start gap-3 mb-4">
-                            <div className="relative shrink-0">
-                              <motion.img
-                                whileHover={{ scale: 1.08 }}
-                                src={expert.avatar}
-                                alt={expert.name}
-                                className="w-14 h-14 rounded-2xl object-cover shadow-sm"
-                              />
-                              <motion.div
-                                animate={{ scale: [1, 1.3, 1] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <h3
-                                onClick={() => navigate(`/experts/${expert.id}`)}
-                                className="font-black text-gray-900 text-sm group-hover:text-[#0eb59a] transition-colors cursor-pointer leading-tight truncate"
-                              >
-                                {expert.name}
-                              </h3>
-                              <p className="text-xs font-bold text-gray-600 mt-0.5">{expert.title}</p>
-                              <p className="text-[11px] text-gray-400 mt-0.5 truncate">{expert.exRole}</p>
-                            </div>
-                          </div>
+                      {/* Filter Header */}
+                      <div className="flex items-center justify-between mb-5">
+                        <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2">
+                          <Filter size={13} className="text-[#0eb59a]" /> Filters
+                        </h3>
+                        {totalActiveFilters > 0 && (
+                          <button
+                            onClick={clearAllFilters}
+                            className="text-xs font-bold text-red-400 hover:text-red-600 flex items-center gap-1"
+                          >
+                            <RefreshCw size={10} /> Clear
+                          </button>
+                        )}
+                      </div>
 
-                          {/* Bio */}
-                          <p className="text-xs text-gray-400 leading-relaxed mb-4 line-clamp-2">
-                            {expert.bio}
+                      {/* Filter sections */}
+                      <div className="space-y-4">
+                        {filterSections.map(section => (
+                          <div key={section.id} className="border-b border-gray-50 pb-4">
+                            <button
+                              onClick={() => setExpandedFilter(expandedFilter === section.id ? null : section.id)}
+                              className="w-full flex items-center justify-between mb-2"
+                            >
+                              <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
+                                <section.icon size={11} className="text-[#0eb59a]" />
+                                {section.label}
+                                {activeFilters[section.id]?.length > 0 && (
+                                  <span className="bg-[#0eb59a] text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                                    {activeFilters[section.id].length}
+                                  </span>
+                                )}
+                              </span>
+                              {expandedFilter === section.id
+                                ? <ChevronUp size={12} className="text-gray-400" />
+                                : <ChevronDown size={12} className="text-gray-400" />
+                              }
+                            </button>
+                            <AnimatePresence>
+                              {expandedFilter === section.id && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden space-y-1"
+                                >
+                                  {section.options.map(option => {
+                                    const isActive = activeFilters[section.id]?.includes(option);
+                                    return (
+                                      <motion.button
+                                        key={option}
+                                        whileHover={{ x: 2 }}
+                                        onClick={() => toggleFilter(section.id, option)}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                          isActive
+                                            ? 'bg-teal-50 text-[#134e40] border border-teal-100'
+                                            : 'text-gray-500 hover:bg-gray-50'
+                                        }`}
+                                      >
+                                        {option}
+                                        {isActive && (
+                                          <div className="w-3.5 h-3.5 bg-[#0eb59a] rounded-full flex items-center justify-center">
+                                            <Check size={8} className="text-white" strokeWidth={3} />
+                                          </div>
+                                        )}
+                                      </motion.button>
+                                    );
+                                  })}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        ))}
+
+                        {/* Experience */}
+                        <div className="border-b border-gray-50 pb-4">
+                          <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <Zap size={11} className="text-[#0eb59a]" /> Experience
                           </p>
-
-                          {/* Meta */}
-                          <div className="grid grid-cols-2 gap-2 mb-4">
-                            {[
-                              { icon: Clock, label: expert.availability, color: 'text-blue-400' },
-                              { icon: MapPin, label: expert.location.split(' | ')[0], color: 'text-rose-400' },
-                              { icon: DollarSign, label: expert.budget, color: 'text-[#0eb59a]' },
-                              { icon: Zap, label: expert.experience, color: 'text-purple-400' },
-                            ].map((meta, mIdx) => (
-                              <div key={mIdx} className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
-                                <meta.icon size={11} className={meta.color} />
-                                <span className="truncate">{meta.label}</span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Skills */}
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {expert.skills.slice(0, 3).map(skill => (
-                              <span key={skill} className="text-[10px] font-bold bg-gray-50 text-gray-500 border border-gray-100 px-2 py-1 rounded-lg">
-                                {skill}
-                              </span>
-                            ))}
-                            {expert.skills.length > 3 && (
-                              <span className="text-[10px] font-bold bg-gray-50 text-gray-400 border border-gray-100 px-2 py-1 rounded-lg">
-                                +{expert.skills.length - 3}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Rating + Response */}
-                          <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-50">
-                            <div className="flex items-center gap-1.5">
-                              <Star size={13} fill="#F59E0B" className="text-amber-400" />
-                              <span className="font-black text-gray-900 text-sm">{expert.rating}</span>
-                              <span className="text-xs text-gray-400">({expert.reviews})</span>
-                            </div>
-                            <span className="text-[11px] font-semibold text-gray-400">
-                              Responds {expert.responseTime}
-                            </span>
-                          </div>
-
-                          {/* Action buttons — stack on mobile */}
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 mt-3 sm:mt-0">
-                            <motion.button
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
-                              onClick={() => navigate(`/experts/${expert.id}`)}
-                              className="flex-1 py-2.5 bg-[#134e40] hover:bg-[#0eb59a] text-white text-xs font-black rounded-xl transition-all shadow-sm w-full sm:w-auto text-center"
-                            >
-                              View Profile
-                            </motion.button>
-                            <div className="flex gap-2 justify-center">
+                          <div className="space-y-1">
+                            {experienceOptions.map(exp => (
                               <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setShowInviteModal(expert)}
-                                className="px-3 py-2.5 bg-teal-50 hover:bg-teal-100 text-[#134e40] text-xs font-black rounded-xl transition-all border border-teal-100"
-                              >
-                                Invite
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => toggleShortlist(expert.id)}
-                                className={`p-2.5 rounded-xl transition-all border ${
-                                  shortlisted.includes(expert.id)
-                                    ? 'bg-red-50 text-red-500 border-red-100'
-                                    : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-red-50 hover:text-red-400'
+                                key={exp}
+                                whileHover={{ x: 2 }}
+                                onClick={() => setActiveFilters(prev => ({ ...prev, experience: exp === 'Any' ? '' : exp }))}
+                                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  (exp === 'Any' && !activeFilters.experience) || activeFilters.experience === exp
+                                    ? 'bg-teal-50 text-[#134e40] border border-teal-100'
+                                    : 'text-gray-500 hover:bg-gray-50'
                                 }`}
                               >
-                                <Heart size={14} fill={shortlisted.includes(expert.id) ? 'currentColor' : 'none'} />
+                                {exp}
+                                {((exp === 'Any' && !activeFilters.experience) || activeFilters.experience === exp) && (
+                                  <div className="w-3.5 h-3.5 bg-[#0eb59a] rounded-full flex items-center justify-center">
+                                    <Check size={8} className="text-white" strokeWidth={3} />
+                                  </div>
+                                )}
                               </motion.button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Budget */}
+                        <div>
+                          <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <DollarSign size={11} className="text-[#0eb59a]" /> Budget Range
+                          </p>
+                          <div className="space-y-1">
+                            {budgetOptions.map(bud => (
                               <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => toggleCompare(expert.id)}
-                                className={`p-2.5 rounded-xl transition-all border text-xs font-black ${
-                                  compareTray.includes(expert.id)
-                                    ? 'bg-blue-50 text-blue-600 border-blue-100'
-                                    : compareTray.length >= 3
-                                    ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed'
-                                    : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-50 hover:text-blue-500'
+                                key={bud}
+                                whileHover={{ x: 2 }}
+                                onClick={() => setActiveFilters(prev => ({ ...prev, budget: bud === 'Any' ? '' : bud }))}
+                                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                  (bud === 'Any' && !activeFilters.budget) || activeFilters.budget === bud
+                                    ? 'bg-teal-50 text-[#134e40] border border-teal-100'
+                                    : 'text-gray-500 hover:bg-gray-50'
                                 }`}
                               >
-                                <BarChart2 size={14} />
+                                {bud}
+                                {((bud === 'Any' && !activeFilters.budget) || activeFilters.budget === bud) && (
+                                  <div className="w-3.5 h-3.5 bg-[#0eb59a] rounded-full flex items-center justify-center">
+                                    <Check size={8} className="text-white" strokeWidth={3} />
+                                  </div>
+                                )}
                               </motion.button>
-                            </div>
+                            ))}
                           </div>
                         </div>
-                      ) : (
-                        // ── LIST CARD ──
-                        <div className="flex items-center gap-5 p-5 w-full">
-                          <div className="relative shrink-0">
-                            <img src={expert.avatar} alt={expert.name} className="w-14 h-14 rounded-2xl object-cover" />
-                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3
-                                onClick={() => navigate(`/experts/${expert.id}`)}
-                                className="font-black text-gray-900 text-sm group-hover:text-[#0eb59a] transition-colors cursor-pointer"
-                              >
-                                {expert.name}
-                              </h3>
-                              {expert.topExpert && <Star size={12} fill="#F59E0B" className="text-amber-400" />}
-                              {expert.verified && <Shield size={12} className="text-blue-500" />}
-                              <span className="ml-auto text-[10px] font-black text-[#134e40] bg-teal-50 px-2 py-0.5 rounded-lg">
-                                {expert.match}% Match
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500 font-semibold mb-2">{expert.exRole}</p>
-                            <div className="flex items-center gap-4 text-[11px] text-gray-400 font-semibold">
-                              <span className="flex items-center gap-1"><Clock size={10} />{expert.availability}</span>
-                              <span className="flex items-center gap-1"><MapPin size={10} />{expert.location.split(' | ')[0]}</span>
-                              <span className="flex items-center gap-1 text-[#0eb59a] font-bold"><DollarSign size={10} />{expert.budget}</span>
-                              <span className="flex items-center gap-1"><Star size={10} fill="#F59E0B" className="text-amber-400" />{expert.rating}</span>
-                            </div>
-                          </div>
-                          {/* Action buttons — stack on mobile */}
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 mt-3 sm:mt-0">
-                            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                              onClick={() => navigate(`/experts/${expert.id}`)}
-                              className="px-4 py-2.5 bg-[#134e40] hover:bg-[#0eb59a] text-white text-xs font-black rounded-xl transition-all w-full sm:w-auto text-center"
-                            >
-                              View Profile
-                            </motion.button>
-                            <div className="flex gap-2 justify-center">
-                              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                onClick={() => setShowInviteModal(expert)}
-                                className="px-3 py-2 bg-teal-50 text-[#134e40] text-xs font-black rounded-xl border border-teal-100"
-                              >
-                                Invite
-                              </motion.button>
-                              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                onClick={() => toggleShortlist(expert.id)}
-                                className={`p-2.5 rounded-xl border transition-all ${shortlisted.includes(expert.id) ? 'bg-red-50 text-red-500 border-red-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
-                              >
-                                <Heart size={14} fill={shortlisted.includes(expert.id) ? 'currentColor' : 'none'} />
-                              </motion.button>
-                              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                onClick={() => toggleCompare(expert.id)}
-                                className={`p-2.5 rounded-xl border transition-all ${compareTray.includes(expert.id) ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
-                              >
-                                <BarChart2 size={14} />
-                              </motion.button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
+                      </div>
+                    </div>
+                  </motion.aside>
+                )}
+              </AnimatePresence>
+
+              {/* ── CENTER EXPERT GRID — 2 columns ── */}
+              <div className="flex-1 min-w-0">
+
+                {/* Results bar */}
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm font-bold text-gray-500">
+                    Showing <span className="text-[#1C3627] font-black">{filteredExperts.length}</span> experts
+                  </p>
+                  <select className="text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0eb59a]/20">
+                    <option>Best Match</option>
+                    <option>Highest Rated</option>
+                    <option>Most Reviews</option>
+                    <option>Budget: Low to High</option>
+                  </select>
                 </div>
-              )}
-            </AnimatePresence>
+
+                {/* Grid */}
+                <AnimatePresence mode="popLayout">
+                  {filteredExperts.length === 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="bg-white rounded-2xl border border-gray-100 p-16 text-center"
+                    >
+                      <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Users size={20} className="text-gray-300" />
+                      </div>
+                      <h3 className="font-black text-[#1C3627] mb-1">No experts found</h3>
+                      <p className="text-gray-400 text-sm mb-5">Try adjusting your filters</p>
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        onClick={clearAllFilters}
+                        className="px-5 py-2.5 bg-[#134e40] text-white text-sm font-bold rounded-xl"
+                      >
+                        Clear Filters
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      {filteredExperts.map((expert, idx) => {
+                        const isHovered = hoveredCardId === expert.id;
+                        const panelSide = getPanelSide(expert.id);
+
+                        return (
+                          <motion.div
+                            key={expert.id}
+                            ref={el => cardRefs.current[expert.id] = el}
+                            layout
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.28, delay: idx * 0.05 }}
+                            onMouseEnter={() => setHoveredCardId(expert.id)}
+                            onMouseLeave={() => setHoveredCardId(null)}
+                            className="relative group z-10 hover:z-[90]"
+                          >
+                            {/* ── BASE CARD ── */}
+                            <motion.div
+                              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                              className={`bg-white rounded-2xl border transition-all duration-200 overflow-visible cursor-pointer
+                                ${isHovered
+                                  ? 'border-[#0eb59a]/40 shadow-[0_12px_40px_rgba(14,181,154,0.12)]'
+                                  : 'border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-gray-200'
+                                }
+                              `}
+                            >
+                              <div className="p-5">
+
+                                {/* Top badges row */}
+                                <div className="flex items-center gap-1.5 mb-4">
+                                  {expert.topExpert && (
+                                    <span className="flex items-center gap-1 text-[9px] font-black text-amber-700 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100">
+                                      <Star size={8} fill="currentColor" /> Top Expert
+                                    </span>
+                                  )}
+                                  {expert.verified && (
+                                    <span className="flex items-center gap-1 text-[9px] font-black text-blue-700 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">
+                                      <Shield size={8} /> Verified
+                                    </span>
+                                  )}
+                                  <div className="ml-auto flex items-center gap-1.5 bg-[#134e40] px-2.5 py-1 rounded-lg">
+                                    <span className="text-[10px] font-black text-white">{expert.match}% Match</span>
+                                  </div>
+                                </div>
+
+                                {/* Avatar + Name — asymmetric image border */}
+                                <div className="flex items-start gap-3 mb-4">
+                                  <div className="relative shrink-0">
+                                    <motion.img
+                                      src={expert.avatar}
+                                      alt={expert.name}
+                                      className="w-14 h-14 object-cover shadow-sm"
+                                      style={{ borderRadius: '12px 0px 12px 12px' }}
+                                    />
+                                    <motion.div
+                                      animate={{ scale: [1, 1.3, 1] }}
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                      className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3
+                                      onClick={() => navigate(`/experts/${expert.id}`)}
+                                      className="font-black text-[#1C3627] text-sm leading-tight mb-0.5 transition-colors cursor-pointer hover:text-[#0eb59a] text-left"
+                                    >
+                                      {expert.name}
+                                    </h3>
+                                    <p className="text-xs font-bold text-gray-600 text-left">{expert.title}</p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5 truncate text-left">{expert.exRole}</p>
+                                  </div>
+                                </div>
+
+                                {/* Bio */}
+                                <p className="text-xs text-gray-400 leading-relaxed mb-4 line-clamp-2 text-left">
+                                  {expert.bio}
+                                </p>
+
+                                {/* Meta grid */}
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                  {[
+                                    { icon: Clock, label: expert.availability, color: 'text-blue-400' },
+                                    { icon: MapPin, label: expert.location.split(' | ')[0], color: 'text-rose-400' },
+                                    { icon: DollarSign, label: expert.budget, color: 'text-[#0eb59a]' },
+                                    { icon: Zap, label: expert.experience, color: 'text-purple-400' },
+                                  ].map((m, mi) => (
+                                    <div key={mi} className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
+                                      <m.icon size={11} className={`${m.color} shrink-0`} />
+                                      <span className="truncate">{m.label}</span>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Skills */}
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                  {expert.skills.slice(0, 3).map(skill => (
+                                    <span key={skill} className="text-[10px] font-semibold bg-[#FAFBF9] text-[#1C3627] border border-gray-200 px-2 py-0.5 rounded-md">
+                                      {skill}
+                                    </span>
+                                  ))}
+                                  {expert.skills.length > 3 && (
+                                    <span className="text-[10px] font-semibold bg-[#FAFBF9] text-gray-400 border border-gray-200 px-2 py-0.5 rounded-md">
+                                      +{expert.skills.length - 3}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Rating + response */}
+                                <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-50">
+                                  <div className="flex items-center gap-1">
+                                    <Star size={12} fill="#F59E0B" className="text-amber-400" />
+                                    <span className="font-black text-[#1C3627] text-sm">{expert.rating}</span>
+                                    <span className="text-xs text-gray-400">({expert.reviews})</span>
+                                  </div>
+                                  <span className="text-[10px] font-medium text-gray-400">
+                                    Responds {expert.responseTime}
+                                  </span>
+                                </div>
+
+                                {/* Action bar */}
+                                <div className="flex items-center gap-2">
+                                  <motion.button
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    onClick={(e) => { e.stopPropagation(); navigate(`/experts/${expert.id}`); }}
+                                    className="flex-1 py-2 bg-[#134e40] hover:bg-[#0eb59a] text-white text-xs font-black rounded-xl transition-all"
+                                  >
+                                    View Profile
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={(e) => { e.stopPropagation(); setShowInviteModal(expert); }}
+                                    className="px-3 py-2 bg-teal-50 text-[#134e40] text-xs font-black rounded-xl border border-teal-100 hover:bg-teal-100 transition-all"
+                                  >
+                                    Invite
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={(e) => { e.stopPropagation(); toggleShortlist(expert.id); }}
+                                    className={`p-2 rounded-xl border transition-all ${
+                                      shortlisted.includes(expert.id)
+                                        ? 'bg-red-50 text-red-500 border-red-100'
+                                        : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-red-50 hover:text-red-400'
+                                    }`}
+                                  >
+                                    <Heart size={13} fill={shortlisted.includes(expert.id) ? 'currentColor' : 'none'} />
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={(e) => { e.stopPropagation(); toggleCompare(expert.id); }}
+                                    className={`p-2 rounded-xl border transition-all ${
+                                      compareTray.includes(expert.id)
+                                        ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                        : compareTray.length >= 3
+                                        ? 'bg-gray-50 text-gray-200 border-gray-100 cursor-not-allowed'
+                                        : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-blue-50 hover:text-blue-500'
+                                    }`}
+                                  >
+                                    <BarChart2 size={13} />
+                                  </motion.button>
+                                </div>
+
+                              </div>
+                            </motion.div>
+
+                            {/* ── FLOATING HOVER OVERLAY PANEL ── */}
+                            <AnimatePresence>
+                              {isHovered && (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.92, x: panelSide === 'right' ? -10 : 10 }}
+                                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                                  exit={{ opacity: 0, scale: 0.92, x: panelSide === 'right' ? -10 : 10 }}
+                                  transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                                  className="absolute top-0 z-[100] w-[280px] bg-[#FAFBF9] rounded-2xl border border-gray-100 shadow-2xl shadow-[#134e40]/10 p-5 pointer-events-none"
+                                  style={{
+                                    [panelSide === 'right' ? 'left' : 'right']: 'calc(100% + 12px)',
+                                  }}
+                                >
+
+                                  {/* Panel header */}
+                                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                                    <img
+                                      src={expert.avatar}
+                                      alt={expert.name}
+                                      className="w-10 h-10 object-cover"
+                                      style={{ borderRadius: '8px 0px 8px 8px' }}
+                                    />
+                                    <div>
+                                      <p className="text-xs font-black text-[#1C3627] leading-none">{expert.name}</p>
+                                      <p className="text-[10px] text-gray-400 mt-0.5">{expert.title}</p>
+                                    </div>
+                                  </div>
+
+                                  {/* SVG Radial Rings */}
+                                  <div className="flex items-center justify-center gap-6 mb-4 pb-4 border-b border-gray-100">
+                                    <RadialRing
+                                      percent={expert.match}
+                                      color="#0eb59a"
+                                      size={60}
+                                      stroke={5}
+                                      label="Match Score"
+                                    />
+                                    <RadialRing
+                                      percent={Math.min(100, expert.completedEngagements * 7)}
+                                      color="#134e40"
+                                      size={60}
+                                      stroke={5}
+                                      label="Competence"
+                                    />
+                                  </div>
+
+                                  {/* Industries */}
+                                  <div className="mb-4">
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Industries</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {expert.industries.map(ind => (
+                                        <span key={ind} className="text-[10px] font-semibold bg-white text-[#134e40] border border-[#134e40]/15 px-2 py-0.5 rounded-md">
+                                          {ind}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Engagement types */}
+                                  <div className="mb-4">
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Engagement Types</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {expert.engagementTypes.map(type => (
+                                        <span key={type} className="text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-100 px-2 py-0.5 rounded-md">
+                                          {type}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* Stats row */}
+                                  <div className="grid grid-cols-3 gap-2 mb-4">
+                                    {[
+                                      { label: 'Engagements', value: expert.completedEngagements, color: 'text-[#0eb59a]' },
+                                      { label: 'Experience', value: expert.experience, color: 'text-purple-500' },
+                                      { label: 'Response', value: expert.responseTime, color: 'text-blue-500' },
+                                    ].map((s, si) => (
+                                      <div key={si} className="bg-white rounded-xl p-2.5 border border-gray-100 text-center">
+                                        <p className={`text-xs font-black ${s.color} leading-none`}>{s.value}</p>
+                                        <p className="text-[9px] text-gray-400 font-medium mt-0.5 leading-tight">{s.label}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Bio excerpt */}
+                                  <div className="bg-white rounded-xl p-3 border border-gray-100">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Profile</p>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed font-medium">{expert.bio}</p>
+                                  </div>
+
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -905,12 +1066,12 @@ const ExpertDiscovery = () => {
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-2xl px-6 py-4"
+            style={{ marginLeft: isSidebarOpen ? 260 : 68, transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)' }}
           >
-            <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <p className="text-sm font-black text-gray-900">
-                  Compare Experts
-                  <span className="ml-2 text-[#0eb59a]">({compareTray.length}/3)</span>
+                  Compare Experts <span className="text-[#0eb59a]">({compareTray.length}/3)</span>
                 </p>
                 <div className="flex gap-3">
                   {compareTray.map(id => {
@@ -922,10 +1083,10 @@ const ExpertDiscovery = () => {
                         animate={{ scale: 1 }}
                         className="flex items-center gap-2 bg-teal-50 border border-teal-100 px-3 py-2 rounded-xl"
                       >
-                        <img src={expert?.avatar} className="w-6 h-6 rounded-lg object-cover" />
+                        <img src={expert?.avatar} className="w-5 h-5 rounded-lg object-cover" />
                         <span className="text-xs font-bold text-[#134e40]">{expert?.name}</span>
                         <button onClick={() => toggleCompare(id)} className="text-gray-400 hover:text-red-500 transition-colors">
-                          <X size={12} />
+                          <X size={11} />
                         </button>
                       </motion.div>
                     );
@@ -935,15 +1096,13 @@ const ExpertDiscovery = () => {
               <div className="flex gap-3">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
                   onClick={() => setCompareTray([])}
                   className="px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-sm font-bold rounded-xl"
                 >
                   Clear
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.03, boxShadow: '0 8px 30px rgba(20,78,64,0.25)' }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: compareTray.length >= 2 ? 1.03 : 1 }}
                   onClick={() => setShowCompareModal(true)}
                   disabled={compareTray.length < 2}
                   className={`px-5 py-2 text-sm font-bold rounded-xl transition-all ${

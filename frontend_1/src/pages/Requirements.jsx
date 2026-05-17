@@ -346,7 +346,7 @@ const Requirements = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f4f7f5] flex overflow-hidden">
+    <div className="min-h-screen bg-[#f4f7f5]">
 
       {/* ── SIDEBAR ── */}
       <motion.aside
@@ -356,7 +356,7 @@ const Requirements = () => {
         style={{ zIndex: 50 }}
       >
         {/* Brand */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-50">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
           <div className="w-9 h-9 bg-[#134e40] rounded-xl flex items-center justify-center shrink-0">
             <span className="text-white font-black text-sm">C</span>
           </div>
@@ -380,16 +380,16 @@ const Requirements = () => {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-hidden">
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-hidden">
           {isSidebarOpen && (
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">Main Menu</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
           )}
           {navItems.map((item) => (
             <motion.button
               key={item.path}
               whileHover={{ x: 2 }}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group relative ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 group relative ${
                 item.active
                   ? 'bg-[#134e40] text-white shadow-md'
                   : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
@@ -423,8 +423,11 @@ const Requirements = () => {
 
       {/* ── MAIN CONTENT AREA ── */}
       <div
-        className="flex-1 flex flex-col min-h-screen overflow-hidden"
-        style={{ marginLeft: isSidebarOpen ? 260 : 68, transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)' }}
+        className="flex flex-col min-h-screen bg-[#f4f7f5] overflow-hidden"
+        style={{
+          marginLeft: isSidebarOpen ? 260 : 68,
+          transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)',
+        }}
       >
 
         {/* ── TOP HEADER ── */}
@@ -474,100 +477,94 @@ const Requirements = () => {
           >
 
             {/* Page Header */}
-            <div className="px-8 pt-7 pb-5">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
-                <button
-                  onClick={() => navigate('/company-dashboard')}
-                  className="hover:text-[#134e40] font-semibold transition-colors duration-150"
-                >
-                  Dashboard
-                </button>
-                <ChevronRight size={12} className="text-gray-300" />
-                <span className="text-[#134e40] font-bold">My Requirements</span>
-              </div>
-              <div className="flex items-end justify-between">
+            <div className="px-8 pt-7 pb-6">
+
+              {/* Top accent line */}
+
+
+              {/* Main row — title left, button right */}
+              <div className="flex items-start justify-between gap-4">
+
                 <div>
-                  <h1 className="text-[28px] font-black text-[#1C3627] tracking-tight leading-none">
+                  {/* Title */}
+                  <h1 className="text-[32px] font-black text-[#1C3627] tracking-tight leading-none mb-4 text-left">
                     My Requirements
                   </h1>
-                  <p className="text-sm text-gray-400 mt-1.5 font-medium">
-                    {requirements.length} roles · {stats.active} active · {stats.draft} draft
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* ── STATS CARDS ── */}
-            <div className="px-8 pb-6 grid grid-cols-4 gap-3">
-              {[
-                {
-                  label: 'Total Posted',
-                  value: stats.total,
-                  icon: Briefcase,
-                  iconBg: 'bg-gray-100',
-                  iconColor: 'text-gray-500',
-                  numColor: 'text-[#1C3627]',
-                  border: 'border-l-4 border-l-gray-300',
-                  trend: 'All time',
-                  trendColor: 'text-gray-400',
-                },
-                {
-                  label: 'Active Roles',
-                  value: stats.active,
-                  icon: Zap,
-                  iconBg: 'bg-teal-100',
-                  iconColor: 'text-[#0eb59a]',
-                  numColor: 'text-[#134e40]',
-                  border: 'border-l-4 border-l-[#0eb59a]',
-                  trend: 'Live now',
-                  trendColor: 'text-[#0eb59a]',
-                },
-                {
-                  label: 'Shortlisting',
-                  value: stats.shortlisting,
-                  icon: Users,
-                  iconBg: 'bg-amber-100',
-                  iconColor: 'text-amber-600',
-                  numColor: 'text-amber-700',
-                  border: 'border-l-4 border-l-amber-400',
-                  trend: 'In progress',
-                  trendColor: 'text-amber-500',
-                },
-                {
-                  label: 'Drafts',
-                  value: stats.draft,
-                  icon: Edit,
-                  iconBg: 'bg-slate-100',
-                  iconColor: 'text-slate-500',
-                  numColor: 'text-slate-600',
-                  border: 'border-l-4 border-l-slate-300',
-                  trend: 'Incomplete',
-                  trendColor: 'text-slate-400',
-                },
-              ].map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06, duration: 0.3 }}
-                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                  style={{ backgroundColor: '#FAFBF9' }}
-                  className={`rounded-2xl p-5 border border-gray-100 ${stat.border} hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`w-8 h-8 ${stat.iconBg} rounded-xl flex items-center justify-center`}>
-                      <stat.icon size={15} className={stat.iconColor} />
+                  {/* Live stat badges */}
+                  <div className="flex items-center gap-2 flex-wrap">
+
+                    {/* Active */}
+                    <div className="flex items-center gap-1.5 bg-[#134e40] px-3 py-1.5 rounded-xl">
+                      <motion.div
+                        animate={{ scale: [1, 1.4, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="w-1.5 h-1.5 rounded-full bg-[#0eb59a]"
+                      />
+                      <span className="text-white text-xs font-bold">
+                        {stats.active} Active Role{stats.active !== 1 ? 's' : ''}
+                      </span>
                     </div>
-                    <span className={`text-[10px] font-bold ${stat.trendColor} bg-white px-2 py-1 rounded-lg border border-gray-100`}>
-                      {stat.trend}
-                    </span>
+
+                    {/* Shortlisting */}
+                    {stats.shortlisting > 0 && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="flex items-center gap-1.5 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-xl"
+                      >
+                        <Users size={11} className="text-amber-500" />
+                        <span className="text-amber-600 text-xs font-bold">
+                          {stats.shortlisting} Shortlisting
+                        </span>
+                      </motion.div>
+                    )}
+
+                    {/* Drafts */}
+                    {stats.draft > 0 && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl"
+                      >
+                        <Edit size={11} className="text-slate-400" />
+                        <span className="text-slate-500 text-xs font-bold">
+                          {stats.draft} Draft{stats.draft > 1 ? 's' : ''}
+                        </span>
+                      </motion.div>
+                    )}
+
+                    {/* Divider */}
+                    <div className="w-px h-4 bg-gray-200" />
+
+                    {/* Experts matched */}
+                    <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-100 px-3 py-1.5 rounded-xl">
+                      <Users size={11} className="text-purple-500" />
+                      <span className="text-purple-600 text-xs font-bold">
+                        {requirements.reduce((sum, r) => sum + (r.matchedExperts || 0), 0)} Experts Matched
+                      </span>
+                    </div>
+
+                    {/* Auto-save */}
+                    <div className="flex items-center gap-1.5 px-2 py-1.5">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                      <span className="text-[11px] text-gray-400 font-medium italic">Auto-saved</span>
+                    </div>
+
                   </div>
-                  <p className={`text-4xl font-black ${stat.numColor} tracking-tight leading-none mb-1`}>
-                    {stat.value}
-                  </p>
-                  <p className="text-xs text-gray-400 font-semibold">{stat.label}</p>
-                </motion.div>
-              ))}
+                </div>
+
+                {/* New Requirement button */}
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 8px 30px rgba(20,78,64,0.25)' }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate('/requirements/create')}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#134e40] text-white text-sm font-bold rounded-xl shadow-md shadow-[#134e40]/20 hover:bg-[#1a6b57] transition-all shrink-0 mt-1"
+                >
+                  <Plus size={15} /> New Requirement
+                </motion.button>
+
+              </div>
             </div>
 
             {/* ── FILTER ROW ── */}
