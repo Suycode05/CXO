@@ -10,7 +10,8 @@ import {
   Zap, Crown, ArrowUpRight, LogOut,
   Eye, EyeOff, RefreshCw, Copy, ExternalLink, Download,
   LayoutDashboard, ShieldCheck, ChevronLeft, ChevronRight as ChevronRightIcon,
-  Bell as BellIcon, Settings as SettingsIcon, BarChart2 as BarChart2Icon
+  Bell as BellIcon, Settings as SettingsIcon, BarChart2 as BarChart2Icon,
+  FileText
 } from 'lucide-react';
 
 const Settings = () => {
@@ -23,6 +24,29 @@ const Settings = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('HR');
   const [inviteSent, setInviteSent] = useState(false);
+
+  // ── NEW MODALS & PAYMENT STATES ──
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
+  const [selectedPaymentType, setSelectedPaymentType] = useState('netbanking');
+  const [paymentAdded, setPaymentAdded] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+  const paymentTypes = [
+    { id: 'netbanking', label: 'Net Banking', icon: '🏦', desc: 'Add your bank account for auto-debit', fields: ['Bank Name', 'Account Number', 'IFSC Code'] },
+    { id: 'upi', label: 'UPI', icon: '🔵', desc: 'Link your UPI ID for instant payments', fields: ['UPI ID'] },
+    { id: 'card', label: 'Credit / Debit Card', icon: '💳', desc: 'Add card details (2% processing fee)', fields: ['Card Number', 'Expiry', 'CVV', 'Name on Card'] },
+  ];
+
+  const handleAddPayment = () => {
+    setPaymentAdded(true);
+    setTimeout(() => {
+      setShowAddPaymentModal(false);
+      setPaymentAdded(false);
+      setSelectedPaymentType('netbanking');
+    }, 2000);
+  };
 
   // ── COMPANY PROFILE STATE ──
   const [profile, setProfile] = useState({
@@ -148,7 +172,7 @@ const Settings = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/company-dashboard' },
-    { icon: Building, label: 'My Requirements', path: '/requirements' },
+    { icon: FileText, label: 'My Requirements', path: '/requirements' },
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2Icon, label: 'Analytics', path: '/analytics' },
@@ -576,16 +600,6 @@ const Settings = () => {
                 ))}
               </div>
 
-              <div className="mt-2 pt-2 border-t border-gray-50">
-                <motion.button
-                  whileHover={{ x: 3, transition: { duration: 0.15 } }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate('/signin?role=company')}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-red-400 hover:bg-red-50 hover:text-red-600 transition-all text-left"
-                >
-                  <LogOut size={15} className="shrink-0" /> Sign Out
-                </motion.button>
-              </div>
             </div>
           </motion.aside>
 
@@ -1130,13 +1144,23 @@ const Settings = () => {
                                 : plan.current
                                 ? '#F0FDF4'
                                 : 'white',
-                              color: isHovered && !plan.current ? 'white' : plan.current ? '#134e40' : '#374151',
-                              border: `1.5px solid ${isHovered && !plan.current ? 'transparent' : plan.current ? '#BBF7D0' : '#E5E7EB'}`,
+                              color: isHovered && !plan.current
+                                ? 'white'
+                                : plan.current
+                                ? '#134e40'
+                                : '#374151',
+                              border: `1.5px solid ${
+                                isHovered && !plan.current
+                                  ? 'transparent'
+                                  : plan.current
+                                  ? '#BBF7D0'
+                                  : '#E5E7EB'
+                              }`,
                               borderRadius: '12px',
                               fontSize: '12px',
                               fontWeight: 900,
                               cursor: plan.current ? 'default' : 'pointer',
-                              transition: 'all 0.2s ease',
+                              transition: 'all 0.25s ease',
                               textAlign: 'center',
                             }}
                           >
@@ -1156,6 +1180,7 @@ const Settings = () => {
                       <motion.button
                         whileHover={{ scale: 1.05, color: '#134e40' }}
                         whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowAddPaymentModal(true)}
                         className="flex items-center gap-1.5 text-xs font-bold text-[#0eb59a] hover:text-[#134e40] transition-colors"
                       >
                         <Plus size={12} /> Add Method
@@ -1241,6 +1266,7 @@ const Settings = () => {
                       <motion.button
                         whileHover={{ scale: 1.03, backgroundColor: '#FEF2F2' }}
                         whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowCancelModal(true)}
                         className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-red-200 text-red-500 text-sm font-bold rounded-xl transition-all"
                       >
                         Cancel Subscription
@@ -1248,6 +1274,7 @@ const Settings = () => {
                       <motion.button
                         whileHover={{ scale: 1.03, boxShadow: '0 8px 20px rgba(239,68,68,0.3)' }}
                         whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowDeleteModal(true)}
                         className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl transition-all shadow-md"
                       >
                         <Trash2 size={13} /> Delete Company Account
@@ -1535,6 +1562,317 @@ const Settings = () => {
                   }}
                 >
                   Contact Sales
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* ══ ADD PAYMENT METHOD MODAL ══ */}
+    <AnimatePresence>
+      {showAddPaymentModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowAddPaymentModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 24 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
+          >
+            <AnimatePresence mode="wait">
+              {!paymentAdded ? (
+                <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+
+                  {/* Header */}
+                  <div style={{ background: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)', padding: '24px' }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                          <CreditCard size={18} className="text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-white text-base text-left">Add Payment Method</h3>
+                          <p className="text-blue-200 text-xs text-left">Secure · Encrypted · RBI compliant</p>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.1, rotate: 90 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setShowAddPaymentModal(false)}
+                        className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/30 transition-all"
+                      >
+                        <X size={13} />
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    {/* Payment type selector */}
+                    <div className="mb-5">
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 text-left">
+                        Payment Type
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {paymentTypes.map(type => (
+                          <motion.button
+                            key={type.id}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => setSelectedPaymentType(type.id)}
+                            className={`p-3 rounded-xl border-2 transition-all text-center ${
+                              selectedPaymentType === type.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-100 bg-gray-50 hover:border-gray-200'
+                            }`}
+                          >
+                            <div className="text-xl mb-1">{type.icon}</div>
+                            <p className={`text-[11px] font-black ${selectedPaymentType === type.id ? 'text-blue-700' : 'text-gray-600'}`}>
+                              {type.label}
+                            </p>
+                          </motion.button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-2 text-left">
+                        {paymentTypes.find(t => t.id === selectedPaymentType)?.desc}
+                      </p>
+                    </div>
+
+                    {/* Dynamic fields based on payment type */}
+                    <div className="space-y-3 mb-5">
+                      {paymentTypes.find(t => t.id === selectedPaymentType)?.fields.map((field, idx) => (
+                        <div key={idx}>
+                          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 text-left">
+                            {field}
+                          </label>
+                          <input
+                            type={field.toLowerCase().includes('number') || field === 'CVV' ? 'number' : 'text'}
+                            placeholder={
+                              field === 'UPI ID' ? 'yourname@upi' :
+                              field === 'IFSC Code' ? 'AXIS0001234' :
+                              field === 'Card Number' ? '•••• •••• •••• ••••' :
+                              field === 'Expiry' ? 'MM/YY' :
+                              field === 'CVV' ? '•••' :
+                              `Enter ${field}`
+                            }
+                            className="w-full px-4 py-2.5 bg-[#FAFBF9] border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all text-left"
+                            onFocus={e => e.target.style.borderColor = '#3B82F6'}
+                            onBlur={e => e.target.style.borderColor = '#E5E7EB'}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Security notice */}
+                    <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100 mb-5">
+                      <Shield size={13} className="text-blue-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-blue-700 leading-relaxed text-left">
+                        Your payment details are encrypted and stored securely. CXO Connect never stores raw card data.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setShowAddPaymentModal(false)}
+                        className="flex-1 py-3 bg-gray-50 border border-gray-200 text-gray-600 text-sm font-bold rounded-2xl transition-all"
+                      >
+                        Cancel
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.03, boxShadow: '0 8px 25px rgba(29,78,216,0.3)' }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={handleAddPayment}
+                        style={{
+                          flex: 1, padding: '12px',
+                          background: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)',
+                          color: 'white', border: 'none',
+                          borderRadius: '16px', fontSize: '14px', fontWeight: 800,
+                          cursor: 'pointer', display: 'flex',
+                          alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        }}
+                      >
+                        <Plus size={14} /> Add Payment Method
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12 px-8"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+                    style={{
+                      width: '80px', height: '80px',
+                      background: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)',
+                      borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      margin: '0 auto 20px',
+                      boxShadow: '0 12px 40px rgba(29,78,216,0.3)',
+                    }}
+                  >
+                    <Check size={36} color="white" strokeWidth={3} />
+                  </motion.div>
+                  <h3 className="text-xl font-black text-[#1C3627] mb-2">Payment Method Added!</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">
+                    Your {paymentTypes.find(t => t.id === selectedPaymentType)?.label} has been added successfully.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* ══ CANCEL SUBSCRIPTION MODAL ══ */}
+    <AnimatePresence>
+      {showCancelModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowCancelModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 24 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden"
+          >
+            <div style={{ background: 'linear-gradient(135deg, #78350f, #f59e0b)', padding: '24px', textAlign: 'center' }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              >
+                <AlertCircle size={24} className="text-white" />
+              </motion.div>
+              <h3 className="font-black text-white text-lg">Cancel Subscription?</h3>
+              <p className="text-white/70 text-xs mt-1">Your plan ends on Jun 1, 2025</p>
+            </div>
+            <div className="p-6">
+              <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 mb-5">
+                <p className="text-xs text-amber-700 font-semibold leading-relaxed text-left">
+                  After cancellation you will lose access to: AI-powered matching, Priority expert access, Dedicated PMO support, and Custom contract templates.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 py-3 bg-gray-50 border border-gray-200 text-gray-600 text-sm font-bold rounded-2xl"
+                >
+                  Keep Plan
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 8px 20px rgba(245,158,11,0.35)' }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowCancelModal(false)}
+                  className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-black rounded-2xl shadow-md transition-all"
+                >
+                  Confirm Cancel
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* ══ DELETE ACCOUNT MODAL ══ */}
+    <AnimatePresence>
+      {showDeleteModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 24 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden"
+          >
+            <div style={{ background: 'linear-gradient(135deg, #450a0a, #ef4444)', padding: '24px', textAlign: 'center' }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              >
+                <Trash2 size={24} className="text-white" />
+              </motion.div>
+              <h3 className="font-black text-white text-lg">Delete Company Account</h3>
+              <p className="text-white/70 text-xs mt-1">This is permanent and cannot be undone</p>
+            </div>
+            <div className="p-6">
+              <div className="bg-red-50 rounded-xl p-4 border border-red-100 mb-4">
+                <p className="text-xs text-red-700 font-semibold leading-relaxed text-left">
+                  This will permanently delete your company account, all requirements, contracts, engagement history, and team members. This action <span className="font-black">cannot be reversed.</span>
+                </p>
+              </div>
+              <div className="mb-5">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 text-left">
+                  Type <span className="text-red-500">DELETE</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full px-4 py-3 bg-red-50 border-2 border-red-200 rounded-xl text-sm font-bold text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-left"
+                />
+              </div>
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
+                  className="flex-1 py-3 bg-gray-50 border border-gray-200 text-gray-600 text-sm font-bold rounded-2xl"
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: deleteConfirmText === 'DELETE' ? 1.03 : 1 }}
+                  whileTap={{ scale: deleteConfirmText === 'DELETE' ? 0.97 : 1 }}
+                  disabled={deleteConfirmText !== 'DELETE'}
+                  onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
+                  style={{
+                    flex: 1, padding: '12px',
+                    background: deleteConfirmText === 'DELETE' ? '#ef4444' : '#F3F4F6',
+                    color: deleteConfirmText === 'DELETE' ? 'white' : '#9CA3AF',
+                    border: 'none', borderRadius: '16px',
+                    fontSize: '14px', fontWeight: 800,
+                    cursor: deleteConfirmText === 'DELETE' ? 'pointer' : 'not-allowed',
+                    boxShadow: deleteConfirmText === 'DELETE' ? '0 4px 15px rgba(239,68,68,0.3)' : 'none',
+                  }}
+                >
+                  Delete Account
                 </motion.button>
               </div>
             </div>
