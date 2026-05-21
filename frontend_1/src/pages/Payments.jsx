@@ -19,7 +19,14 @@ const Payments = () => {
 
   // Authentication Guard
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
+
     const checkAuth = async () => {
+      if (isDemo) {
+        setCompanyProfile({ company_name: 'Acme Corp.', admin_email: 'demo@cxo.com' });
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
@@ -40,7 +47,7 @@ const Payments = () => {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+      if (!session && !isDemo) {
         navigate('/signin?role=company');
       }
     });

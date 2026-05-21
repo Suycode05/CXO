@@ -29,7 +29,71 @@ const Requirements = () => {
 
   // Authentication Guard & Fetch
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
+
     const checkAuthAndFetch = async () => {
+      if (isDemo) {
+        setCompanyProfile({ company_name: 'Acme Corp.', admin_email: 'demo@cxo.com' });
+        setRequirements([
+          {
+            id: 1,
+            title: 'Interim CFO',
+            type: 'Interim',
+            status: 'Active',
+            functionalArea: 'FINANCE',
+            budget: '₹2.5L - ₹4L/mo',
+            duration: '6 months',
+            commitment: 'Full-time',
+            urgency: 'Immediate',
+            location: 'Hybrid | Delhi',
+            postedDate: 'Jan 28, 2025',
+            matchedExperts: 12,
+            shortlisted: 4,
+            invited: 2,
+            skills: ['Fundraising', 'M&A', 'Financial Modeling'],
+            description: 'We need an experienced CFO to lead our Series B fundraising...',
+            matchBreakdown: { applied: 0, reviewed: 0, shortlisted: 4, interviewed: 2 },
+            recentApplicants: [],
+            timeline: [
+              { label: 'Posted', date: 'Jan 28, 2025', done: true },
+              { label: 'Matching', date: 'Done', done: true },
+              { label: 'Shortlisting', date: 'In Progress', done: true },
+              { label: 'Interview', date: 'Pending', done: false },
+              { label: 'Placed', date: 'Pending', done: false },
+            ]
+          },
+          {
+            id: 2,
+            title: 'Fractional CMO',
+            type: 'Fractional',
+            status: 'Shortlisting',
+            functionalArea: 'MARKETING',
+            budget: '₹1.5L - ₹2.5L/mo',
+            duration: 'Flexible',
+            commitment: '15 hrs/wk',
+            urgency: 'Planned',
+            location: 'Remote',
+            postedDate: 'Feb 10, 2025',
+            matchedExperts: 8,
+            shortlisted: 2,
+            invited: 1,
+            skills: ['Brand Strategy', 'Growth Marketing', 'GTM'],
+            description: 'Looking for a CMO to revamp our brand strategy...',
+            matchBreakdown: { applied: 0, reviewed: 0, shortlisted: 2, interviewed: 1 },
+            recentApplicants: [],
+            timeline: [
+              { label: 'Posted', date: 'Feb 10, 2025', done: true },
+              { label: 'Matching', date: 'Done', done: true },
+              { label: 'Shortlisting', date: 'In Progress', done: true },
+              { label: 'Interview', date: 'Pending', done: false },
+              { label: 'Placed', date: 'Pending', done: false },
+            ]
+          }
+        ]);
+        setIsLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
@@ -97,7 +161,7 @@ const Requirements = () => {
     checkAuthAndFetch();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+      if (!session && !isDemo) {
         navigate('/signin?role=company');
       }
     });

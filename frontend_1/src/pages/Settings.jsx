@@ -67,7 +67,23 @@ const Settings = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
 
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
+
     const fetchProfile = async () => {
+      if (isDemo) {
+        setProfile(prev => ({
+          ...prev,
+          companyName: 'Acme Corp Private Limited',
+          adminEmail: 'demo@cxo.com',
+        }));
+        setTeamMembers([
+          { id: 1, name: 'John Doe', email: 'john@acmecorp.com', role: 'Company Admin', status: 'Active' },
+          { id: 2, name: 'Jane Smith', email: 'jane@acmecorp.com', role: 'HR Manager', status: 'Active' }
+        ]);
+        setLoadingProfile(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');

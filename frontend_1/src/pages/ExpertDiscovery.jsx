@@ -18,7 +18,9 @@ const ExpertDiscovery = () => {
 
   // Authentication Guard
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
     const checkAuth = async () => {
+      if (isDemo) return;
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
@@ -27,7 +29,7 @@ const ExpertDiscovery = () => {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+      if (!session && !isDemo) {
         navigate('/signin?role=company');
       }
     });

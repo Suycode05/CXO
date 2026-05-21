@@ -17,7 +17,9 @@ const CreateRequirement = () => {
 
   // Authentication Guard
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
     const checkAuth = async () => {
+      if (isDemo) return;
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
@@ -26,7 +28,7 @@ const CreateRequirement = () => {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
+      if (!session && !isDemo) {
         navigate('/signin?role=company');
       }
     });
@@ -239,8 +241,16 @@ const CreateRequirement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (status = 'Active') => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
     setIsSubmitting(true);
     try {
+      if (isDemo) {
+        setTimeout(() => {
+          navigate('/requirements');
+        }, 1000);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !session.user.email) {
         navigate('/signin?role=company');

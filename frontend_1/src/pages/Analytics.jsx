@@ -135,7 +135,14 @@ const Analytics = () => {
   const [companyProfile, setCompanyProfile] = useState(null);
 
   useEffect(() => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
+
     const check = async () => {
+      if (isDemo) {
+        setCompanyProfile({ company_name: 'Acme Corp.', admin_email: 'demo@cxo.com' });
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
@@ -156,7 +163,7 @@ const Analytics = () => {
     };
     check();
     const { data: l } = supabase.auth.onAuthStateChange((_, s) => {
-      if (!s) navigate('/signin?role=company');
+      if (!s && !isDemo) navigate('/signin?role=company');
     });
     return () => l?.subscription?.unsubscribe();
   }, [navigate]);
