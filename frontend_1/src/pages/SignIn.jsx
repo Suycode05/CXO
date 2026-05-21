@@ -56,6 +56,9 @@ const SignIn = () => {
 				localStorage.removeItem('demo_company');
 				const { error: authError } = await supabase.auth.signInWithOtp({
 					email: targetEmailForAuth,
+					options: {
+						emailRedirectTo: window.location.origin + "/company-dashboard"
+					}
 				});
 				if (authError) throw authError;
 
@@ -73,6 +76,9 @@ const SignIn = () => {
 				if (loginMethod === "otp") {
 					const { error } = await supabase.auth.signInWithOtp({
 						email: cleanIdentifier,
+						options: {
+							emailRedirectTo: window.location.origin + "/expert-dashboard"
+						}
 					});
 
 					if (error) throw error;
