@@ -435,20 +435,12 @@ const CompanyDashboard = () => {
         className="bg-white border-r border-gray-100 flex flex-col z-50 overflow-hidden shrink-0 shadow-sm fixed left-0 top-0 h-screen"
       >
         <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
-          {/* LOGO PLACEHOLDER: Replace span with <img src="/logo.png"> when ready */}
-          <div
-            style={{ background: 'linear-gradient(135deg, #134e40 0%, #0eb59a 100%)' }}
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          >
-            <span className="text-left text-white font-black text-xs tracking-tight">CX</span>
-          </div>
           <motion.div
-            animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+            animate={{ width: isSidebarOpen ? 'auto' : 0, opacity: isSidebarOpen ? 1 : 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden whitespace-nowrap flex flex-col"
+            className="overflow-hidden shrink-0 flex items-center"
           >
-            <p className="text-left text-[#134e40] font-black text-sm leading-none">CXO Connect</p>
-            <p className="text-left text-gray-400 text-[10px] mt-0.5">Company Portal</p>
+            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}

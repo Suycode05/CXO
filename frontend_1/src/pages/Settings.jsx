@@ -360,25 +360,14 @@ const Settings = () => {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="bg-white border-r border-gray-100 flex flex-col z-50 overflow-hidden shrink-0 shadow-sm fixed left-0 top-0 h-screen"
     >
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
-        <motion.div whileHover={{ scale: 1.05, rotate: 2 }} whileTap={{ scale: 0.95 }}
-          className="w-9 h-9 bg-gradient-to-br from-[#134e40] to-[#0eb59a] rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md overflow-hidden shrink-0">
-          {profile?.logoUrl ? (
-            <img src={profile.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-white font-black text-sm">
-              {profile?.companyName ? profile.companyName.charAt(0).toUpperCase() : 'C'}
-            </span>
-          )}
-        </motion.div>
-        <motion.div
-          animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
-          transition={{ duration: 0.2 }}
-          className="overflow-hidden whitespace-nowrap flex flex-col"
-        >
-          <p className="text-[#134e40] font-black text-sm leading-none">{profile?.companyName || 'CXO Connect'}</p>
-          <p className="text-gray-400 text-[10px] mt-0.5">Company Portal</p>
-        </motion.div>
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+          <motion.div
+            animate={{ width: isSidebarOpen ? 'auto' : 0, opacity: isSidebarOpen ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden shrink-0 flex items-center"
+          >
+            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+          </motion.div>
         <motion.button
           animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
           whileHover={{ scale: 1.1 }}
