@@ -36,30 +36,80 @@ const SignIn = () => {
 					return;
 				}
 
-				const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/check-company-email`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ email: cleanEmail })
-				});
+				let targetEmail = cleanEmail;
+				let backendVerified = false;
 
-				const data = await res.json();
-				if (!res.ok) {
-					console.error("DB Error:", data.error);
-					throw new Error("Company not found");
+				// Try to verify company email with the backend if available
+				try {
+					const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+					const res = await fetch(`${baseUrl}/api/auth/check-company-email`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ email: cleanEmail })
+					});
+
+					if (res.ok) {
+						const data = await res.json();
+						if (data && data.email) {
+							targetEmail = data.email.trim();
+							backendVerified = true;
+						}
+					} else {
+						// If backend explicitly says company not found (404), respect it
+						if (res.status === 404) {
+							throw new Error("Company not found");
+						}
+						console.warn(`Backend responded with status ${res.status}. Falling back.`);
+					}
+				} catch (fetchErr) {
+					// If it was a "Company not found" error, propagate it
+					if (fetchErr.message === "Company not found") {
+						throw fetchErr;
+					}
+
+					console.warn("Backend fetch failed, trying direct Supabase check:", fetchErr);
+					
+					// Fallback to querying Supabase directly
+					try {
+						const { data: sbData, error: sbError } = await supabase
+							.from("company_applications")
+							.select("admin_email")
+							.eq("admin_email", cleanEmail)
+							.limit(1)
+							.maybeSingle();
+
+						if (!sbError && sbData) {
+							if (sbData.admin_email) {
+								targetEmail = sbData.admin_email.trim();
+								backendVerified = true;
+							}
+						} else if (sbError) {
+							console.error("Supabase query error:", sbError);
+						} else {
+							// If query succeeded but returned no data, it means company not found
+							throw new Error("Company not found");
+						}
+					} catch (sbErr) {
+						if (sbErr.message === "Company not found") {
+							throw sbErr;
+						}
+						console.error("Supabase fallback query failed:", sbErr);
+						// If Supabase RLS blocked it or failed, we just proceed with cleanEmail to avoid blocking valid users
+					}
 				}
 
-				const targetEmail = data.email?.trim();
 				setResolvedEmail(targetEmail);
-
-				const targetEmailForAuth = cleanEmail === "demo@cxo.com" ? cleanEmail : resolvedEmail || cleanEmail;
 				
 				localStorage.removeItem('demo_company');
 				const { error: authError } = await supabase.auth.signInWithOtp({
-					email: targetEmailForAuth
+					email: targetEmail,
+					options: {
+						emailRedirectTo: window.location.origin + "/company-dashboard"
+					}
 				});
 				if (authError) throw authError;
 
-				setMessage(`✅ OTP sent to ${targetEmailForAuth}`);
+				setMessage(`✅ OTP sent to ${targetEmail}`);
 				setShowOtp(true);
 			} else {
 				// 👨‍💼 EXPERT LOGIN
@@ -83,7 +133,8 @@ const SignIn = () => {
 					setMessage(`✅ OTP sent to ${cleanIdentifier}`);
 					setShowOtp(true);
 				} else {
-					const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/send-magic-link`, {
+					const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+					const response = await fetch(`${baseUrl}/api/auth/send-magic-link`, {
 						method: "POST",
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify({ 
