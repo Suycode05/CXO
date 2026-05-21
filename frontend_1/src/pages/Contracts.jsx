@@ -22,6 +22,18 @@ const Contracts = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=company');
+        return;
+      }
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/company/profile`, {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCompanyProfile(data);
+        }
+      } catch (err) {
+        console.error("Error fetching company profile:", err);
       }
     };
     checkAuth();

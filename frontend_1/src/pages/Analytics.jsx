@@ -14,7 +14,6 @@ import {
 
 // ── ANIMATED COUNTER ──
 const AnimatedNumber = ({ value, suffix = '' }) => {
-  const [companyProfile, setCompanyProfile] = useState(null);
   const [display, setDisplay] = useState(0);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
@@ -133,11 +132,27 @@ const SectionHeading = ({ icon: Icon, label, iconBg = 'bg-teal-50', iconColor = 
 
 const Analytics = () => {
   const navigate = useNavigate();
+  const [companyProfile, setCompanyProfile] = useState(null);
 
   useEffect(() => {
     const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) navigate('/signin?role=company');
+      if (!session) {
+        navigate('/signin?role=company');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/company/profile`, {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCompanyProfile(data);
+        }
+      } catch (err) {
+        console.error("Error fetching company profile:", err);
+      }
     };
     check();
     const { data: l } = supabase.auth.onAuthStateChange((_, s) => {

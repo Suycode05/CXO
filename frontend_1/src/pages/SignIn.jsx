@@ -36,20 +36,20 @@ const SignIn = () => {
 					return;
 				}
 
-				const { data, error: dbError } = await supabase
-					.from("company_applications")
-					.select("admin_email")
-					.eq("admin_email", cleanEmail)
-					.limit(1)
-					.maybeSingle();
+				const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/check-company-email`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email: cleanEmail })
+				});
 
-					if (dbError || !data) {
-						console.error("DB Error:", dbError);
-						throw new Error("Company not found");
-					}
+				const data = await res.json();
+				if (!res.ok) {
+					console.error("DB Error:", data.error);
+					throw new Error("Company not found");
+				}
 
-					const targetEmail = data.admin_email?.trim();
-					setResolvedEmail(targetEmail);
+				const targetEmail = data.email?.trim();
+				setResolvedEmail(targetEmail);
 
 				const targetEmailForAuth = cleanEmail === "demo@cxo.com" ? cleanEmail : resolvedEmail || cleanEmail;
 				
