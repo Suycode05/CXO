@@ -133,19 +133,16 @@ const SignIn = () => {
 				loginMethod={loginMethod}
 				setLoginMethod={setLoginMethod}
 				onOAuthSignIn={handleOAuthSignIn}
-			/>
-
-			{showOtp && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-					<div className="max-w-md w-full p-6">
-						<OTPBox
-							email={role === "company" ? resolvedEmail : identifier}
-							role={role}
-							onSuccess={() => navigate(role === "company" ? "/company-dashboard" : "/expert-dashboard")}
-						/>
-					</div>
-				</div>
-			)}
+				showOtp={showOtp}
+			>
+				{showOtp && (
+					<OTPBox
+						email={role === "company" ? resolvedEmail : identifier}
+						role={role}
+						onSuccess={() => navigate(role === "company" ? "/company-dashboard" : "/expert-dashboard")}
+					/>
+				)}
+			</SignIn2>
 		</div>
 	);
 };
