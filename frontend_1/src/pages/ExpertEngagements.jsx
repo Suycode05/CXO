@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -11,13 +11,40 @@ import {
   Image, File, Building, Target, Activity,
   ChevronDown, Plus, ArrowUpRight, Award
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const ExpertEngagements = () => {
   const navigate = useNavigate();
   const { engagementId } = useParams();
 
-  // ── STATE ──
   const [activeTab, setActiveTab] = useState('Overview');
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/expert/profile`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Error fetching profile in engagements:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const [selectedEngagement, setSelectedEngagement] = useState(engagementId || '1');
   const [messageText, setMessageText] = useState('');
   const [showSubmitModal, setShowSubmitModal] = useState(null);
@@ -959,8 +986,12 @@ const ExpertEngagements = () => {
                       className={`flex gap-3 ${isExpert ? 'flex-row-reverse' : ''}`}
                     >
                       {isExpert ? (
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center text-white text-xs font-black shrink-0">
-                          DC
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center text-white text-xs font-black shrink-0 overflow-hidden">
+                          {profile?.profile_url ? (
+                            <img src={profile.profile_url} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            profile?.full_name ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'EX'
+                          )}
                         </div>
                       ) : (
                         <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${engagement.logoColor} flex items-center justify-center text-white text-xs font-black shrink-0`}>

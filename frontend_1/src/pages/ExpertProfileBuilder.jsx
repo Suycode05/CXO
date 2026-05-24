@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,6 +10,7 @@ import {
   TrendingUp, Zap, BookOpen, FileText, AlertCircle,
   Mail, Phone, ExternalLink
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const ExpertProfileBuilder = () => {
   const navigate = useNavigate();
@@ -194,9 +195,100 @@ const ExpertProfileBuilder = () => {
   const modeOptions = ['Remote', 'Hybrid', 'In-Person'];
   const hoursOptions = ['5-10 hrs/wk', '10-20 hrs/wk', '20-30 hrs/wk', '40 hrs/wk (Full-time)'];
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/expert/profile`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const nameParts = (data.full_name || '').split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          setProfile({
+            firstName,
+            lastName,
+            headline: data.headline || '',
+            bio: data.services_offered || '',
+            location: 'Remote',
+            email: data.email || '',
+            phone: data.phone || '',
+            linkedin: data.linkedin || '',
+            website: data.portfolio_website || '',
+            yearsExperience: data.years_experience || '',
+            currentRole: data.current_role || '',
+            languages: ['English', 'Hindi'],
+          });
+
+          if (data.key_skills) {
+            setSkills(data.key_skills.split(',').map(s => s.trim()).filter(Boolean));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching expert profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("Please sign in first");
+      return;
+    }
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const updatedProfile = {
+        full_name: `${profile.firstName} ${profile.lastName}`.trim(),
+        headline: profile.headline,
+        primary_domain: profile.currentRole || 'Fractional Executive',
+        years_experience: profile.yearsExperience,
+        current_role: profile.currentRole,
+        current_company: '',
+        key_skills: skills.join(', '),
+        services_offered: profile.bio,
+        hourly_rate: '200000', // default rate
+        email: profile.email,
+        phone: profile.phone,
+        linkedin: profile.linkedin,
+        portfolio_website: profile.website,
+        github: '',
+        work_samples: ''
+      };
+
+      const response = await fetch(`${baseUrl}/api/expert/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      if (response.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        const errData = await response.json();
+        console.error("Failed to save profile:", errData);
+        alert(`Error saving profile: ${errData.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      alert("Failed to save profile");
+    }
   };
 
   const addSkill = () => {
