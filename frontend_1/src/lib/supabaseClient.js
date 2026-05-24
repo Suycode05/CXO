@@ -31,10 +31,16 @@ const createMockAuth = (originalAuth = {}) => ({
 });
 
 const createSupabaseClient = () => {
-  if (supabaseUrl && supabaseAnonKey) {
+  const isMockAuth = typeof window !== 'undefined' && localStorage.getItem('sb-mock-auth') === 'true';
+
+  if (supabaseUrl && supabaseAnonKey && !isMockAuth) {
     return createClient(supabaseUrl, supabaseAnonKey);
   } else {
-    console.warn('Supabase environment variables not set – using mock client');
+    if (isMockAuth) {
+      console.info('Mock authentication enabled via localStorage flag');
+    } else {
+      console.warn('Supabase environment variables not set – using mock client');
+    }
     const chainableMock = {
       select: () => chainableMock,
       insert: () => chainableMock,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -147,9 +147,75 @@ const ExpertSettings = () => {
   ];
 
   // ── HELPERS ──
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/expert/profile`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+          setAccount(prev => ({
+            ...prev,
+            email: data.email || prev.email,
+            phone: data.phone || prev.phone,
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching profile in settings:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("Please sign in first");
+      return;
+    }
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      const updatedProfile = {
+        ...profile,
+        email: account.email,
+        phone: account.phone,
+      };
+
+      const response = await fetch(`${baseUrl}/api/expert/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      if (response.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        const errData = await response.json();
+        console.error("Failed to save settings:", errData);
+        alert(`Error saving settings: ${errData.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      alert("Failed to save settings");
+    }
   };
 
   const toggleNotification = (key) => {

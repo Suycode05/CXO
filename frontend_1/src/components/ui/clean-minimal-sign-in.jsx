@@ -3,13 +3,13 @@
 import * as React from "react";
 import { LogIn, Lock, Mail } from "lucide-react";
 
-const SignIn2 = ({ 
-  email, 
-  setEmail, 
-  password, 
-  setPassword, 
-  handleSignIn, 
-  error, 
+const SignIn2 = ({
+  email,
+  setEmail,
+  password,
+  setPassword,
+  handleSignIn,
+  error,
   title = "Sign in with email",
   description = "Make a new doc to bring your words, data, and teams together. For free",
   buttonText = "Get Started",
@@ -17,7 +17,9 @@ const SignIn2 = ({
   loginMethod,
   setLoginMethod,
   role,
-  onOAuthSignIn
+  onOAuthSignIn,
+  showOtp,
+  children
 }) => {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')] bg-cover bg-center z-1 relative">
@@ -41,11 +43,24 @@ const SignIn2 = ({
               placeholder="Email"
               type="email"
               value={email}
-              className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0eb59a]/20 bg-gray-50/50 text-black text-sm"
-              onChange={(e) => setEmail(e.target.value)}
+              disabled={showOtp}
+              className={`w-full pl-10 pr-3 py-2 rounded-xl border 
+              focus:outline-none focus:ring-2 focus:ring-[#0eb59a]/20 
+              text-black text-sm transition-all
+              ${showOtp 
+                  ? 'bg-gray-100 border-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-gray-50/50 border-gray-200'
+              }`}
+              onChange={(e) => !showOtp && setEmail(e.target.value)}
             />
           </div>
-          
+          {showOtp && (
+            <p className="text-xs text-[#0eb59a] font-medium mt-1 ml-1 
+            flex items-center gap-1">
+                <span>✓</span> OTP sent to {email}
+            </p>
+          )}
+
           {showPassword && (
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -102,55 +117,62 @@ const SignIn2 = ({
             )}
           </div>
         </div>
-        <button
-          onClick={handleSignIn}
-          className="w-full bg-gradient-to-b from-[#0eb59a] to-[#0a8c77] text-white font-semibold py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:brightness-105 cursor-pointer transition-all mb-4 mt-2"
-        >
-          {buttonText}
-        </button>
-        <div className="flex items-center w-full my-2">
-          <div className="flex-grow border-t border-dashed border-gray-200"></div>
-          <span className="mx-2 text-xs text-gray-400">Or sign in with</span>
-          <div className="flex-grow border-t border-dashed border-gray-200"></div>
-        </div>
-        <div className="flex gap-3 w-full justify-center mt-2">
-          <button 
-            onClick={() => onOAuthSignIn && onOAuthSignIn('google')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
+        {!showOtp && (
+          <button
+            onClick={handleSignIn}
+            className="w-full bg-gradient-to-b from-[#0eb59a] to-[#0a8c77] text-white font-semibold py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:brightness-105 cursor-pointer transition-all mb-4 mt-2"
           >
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-6 h-6"
-            />
+            {buttonText}
           </button>
-          <button 
-            onClick={() => onOAuthSignIn && onOAuthSignIn('linkedin_oidc')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
-          >
-            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-[#0a66c2]">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-          </button>
-          <button 
-            onClick={() => onOAuthSignIn && onOAuthSignIn('twitter')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
-          >
-            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-black">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-          </button>
-        </div>
-        
-        <p className="mt-6 text-center text-xs text-gray-400">
-          New here?{" "}
-          <a
-            href={role === "company" ? "/join-company" : "/join-expert"}
-            className="text-[#0eb59a] hover:underline font-semibold"
-          >
-            Join as {role === "company" ? "Company" : "Expert"}
-          </a>
-        </p>
+        )}
+        {children}
+        {!showOtp && (
+          <>
+            <div className="flex items-center w-full my-2">
+              <div className="flex-grow border-t border-dashed border-gray-200"></div>
+              <span className="mx-2 text-xs text-gray-400">Or sign in with</span>
+              <div className="flex-grow border-t border-dashed border-gray-200"></div>
+            </div>
+            <div className="flex gap-3 w-full justify-center mt-2">
+              <button
+                onClick={() => onOAuthSignIn && onOAuthSignIn('google')}
+                className="flex items-center justify-center w-12 h-12 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#4285F4] hover:shadow-md hover:shadow-[#4285F4]/20 hover:scale-110 active:scale-95 transition-all duration-200 grow cursor-pointer"
+              >
+                <img
+                  src="https://www.svgrepo.com/show/475656/google-color.svg"
+                  alt="Google"
+                  className="w-6 h-6"
+                />
+              </button>
+              <button
+                onClick={() => onOAuthSignIn && onOAuthSignIn('linkedin_oidc')}
+                className="flex items-center justify-center w-12 h-12 rounded-xl border border-gray-200 bg-white hover:bg-[#0a66c2]/5 hover:border-[#0a66c2] hover:shadow-md hover:shadow-[#0a66c2]/20 hover:scale-110 active:scale-95 transition-all duration-200 grow cursor-pointer"
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-[#0a66c2]">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => onOAuthSignIn && onOAuthSignIn('twitter')}
+                className="flex items-center justify-center w-12 h-12 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-900 hover:shadow-md hover:shadow-black/10 hover:scale-110 active:scale-95 transition-all duration-200 grow cursor-pointer"
+              >
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-black">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 24.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="mt-6 text-center text-xs text-gray-400">
+              New here?{" "}
+              <a
+                href={role === "company" ? "/join-company" : "/join-expert"}
+                className="text-[#0eb59a] hover:underline font-semibold"
+              >
+                Join as {role === "company" ? "Company" : "Expert"}
+              </a>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

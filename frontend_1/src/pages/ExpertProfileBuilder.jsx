@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,9 +10,11 @@ import {
   TrendingUp, Zap, BookOpen, FileText, AlertCircle,
   Mail, Phone, ExternalLink
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const ExpertProfileBuilder = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('Basic Info');
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -36,6 +38,7 @@ const ExpertProfileBuilder = () => {
     yearsExperience: '18',
     currentRole: 'Fractional CFO',
     languages: ['English', 'Hindi', 'Mandarin'],
+    profileUrl: '',
   });
 
   const [skills, setSkills] = useState([
@@ -194,9 +197,142 @@ const ExpertProfileBuilder = () => {
   const modeOptions = ['Remote', 'Hybrid', 'In-Person'];
   const hoursOptions = ['5-10 hrs/wk', '10-20 hrs/wk', '20-30 hrs/wk', '40 hrs/wk (Full-time)'];
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/expert/profile`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const nameParts = (data.full_name || '').split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          setProfile({
+            firstName,
+            lastName,
+            headline: data.headline || '',
+            bio: data.services_offered || '',
+            location: 'Remote',
+            email: data.email || '',
+            phone: data.phone || '',
+            linkedin: data.linkedin || '',
+            website: data.portfolio_website || '',
+            yearsExperience: data.years_experience || '',
+            currentRole: data.current_role || '',
+            languages: ['English', 'Hindi'],
+            profileUrl: data.profile_url || '',
+          });
+
+          if (data.key_skills) {
+            setSkills(data.key_skills.split(',').map(s => s.trim()).filter(Boolean));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching expert profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("Please sign in first");
+      return;
+    }
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const updatedProfile = {
+        full_name: `${profile.firstName} ${profile.lastName}`.trim(),
+        headline: profile.headline,
+        primary_domain: profile.currentRole || 'Fractional Executive',
+        years_experience: profile.yearsExperience,
+        current_role: profile.currentRole,
+        current_company: '',
+        key_skills: skills.join(', '),
+        services_offered: profile.bio,
+        hourly_rate: '200000', // default rate
+        email: profile.email,
+        phone: profile.phone,
+        linkedin: profile.linkedin,
+        portfolio_website: profile.website,
+        github: '',
+        work_samples: '',
+        profile_url: profile.profileUrl || ''
+      };
+
+      const response = await fetch(`${baseUrl}/api/expert/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      if (response.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        const errData = await response.json();
+        console.error("Failed to save profile:", errData);
+        alert(`Error saving profile: ${errData.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      alert("Failed to save profile");
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file.');
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Please sign in first');
+        return;
+      }
+
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data: fileData, error: uploadError } = await supabase.storage
+        .from('expert-profiles')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      if (fileData) {
+        const publicUrl = supabase.storage
+          .from('expert-profiles')
+          .getPublicUrl(fileName)?.data?.publicUrl;
+
+        if (publicUrl) {
+          setProfile(prev => ({ ...prev, profileUrl: publicUrl }));
+        }
+      }
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      alert(`Failed to upload photo: ${err.message || 'Unknown error'}`);
+    }
   };
 
   const addSkill = () => {
@@ -409,10 +545,32 @@ const ExpertProfileBuilder = () => {
 
                     {/* Photo upload */}
                     <div className="flex items-center gap-5 mb-6">
-                      <div className="relative group cursor-pointer">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center shadow-lg">
-                          <span className="text-2xl font-black text-white">DC</span>
-                        </div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                      />
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="relative group cursor-pointer"
+                      >
+                        {profile.profileUrl ? (
+                          <img
+                            src={profile.profileUrl}
+                            alt="Profile"
+                            className="w-20 h-20 rounded-2xl object-cover shadow-lg border border-gray-100"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#134e40] to-[#0eb59a] flex items-center justify-center shadow-lg">
+                            <span className="text-2xl font-black text-white">
+                              {profile.firstName && profile.lastName
+                                ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
+                                : (profile.firstName ? profile.firstName[0].toUpperCase() : 'EX')}
+                            </span>
+                          </div>
+                        )}
                         <motion.div
                           whileHover={{ scale: 1.05 }}
                           className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
@@ -425,6 +583,7 @@ const ExpertProfileBuilder = () => {
                         <p className="text-xs text-gray-400 mb-2">Square image, min 400×400px. Your face should be clearly visible.</p>
                         <motion.button
                           whileHover={{ scale: 1.03 }}
+                          onClick={() => fileInputRef.current?.click()}
                           className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 text-xs font-bold rounded-xl hover:bg-gray-100 transition-all"
                         >
                           <Upload size={13} /> Upload Photo
