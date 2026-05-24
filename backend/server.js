@@ -6,6 +6,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
+import expertRoutes from "./routes/expertRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -30,5 +31,6 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/company", companyRoutes);
+app.use("/api/expert", expertRoutes);
 
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));

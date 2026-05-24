@@ -10,7 +10,7 @@ import {
   CheckCircle, X, ExternalLink, Building, Target,
   LayoutDashboard, CreditCard, FileText,
   LogOut, Settings, ShieldCheck, Menu, Bell,
-  ChevronLeft, RefreshCw
+  ChevronLeft, RefreshCw, Edit
 } from 'lucide-react';
 
 const ExpertProfile = () => {
@@ -32,6 +32,7 @@ const ExpertProfile = () => {
         navigate('/signin?role=company');
         return;
       }
+      setCurrentUser(session.user);
       
       try {
         const profileRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/company/profile`, {
@@ -63,6 +64,7 @@ const ExpertProfile = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [companyProfile, setCompanyProfile] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/company-dashboard' },
@@ -201,6 +203,11 @@ const ExpertProfile = () => {
   };
   const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const isOwner = currentUser && expert && (
+    currentUser.email === expert.email || 
+    currentUser.id === expert.user_id
+  );
 
   useEffect(() => {
     const fetchExpert = async () => {
@@ -722,6 +729,16 @@ Bio: ${expert.bio}
                   </span>
                   {/* Share + Download — moved to badge row right side */}
                   <div className="ml-auto flex items-center gap-2">
+                    {isOwner && (
+                      <motion.button
+                        whileHover={{ scale: 1.05, backgroundColor: 'white', color: '#134e40' }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate('/expert-profile')}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-white/10 text-white rounded-xl border border-white/20 font-bold text-xs shadow-md transition-all duration-200"
+                      >
+                        <Edit size={12} className="shrink-0" /> Edit Profile
+                      </motion.button>
+                    )}
                     <motion.button
                       whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.25)' }}
                       whileTap={{ scale: 0.9 }}
@@ -1481,105 +1498,135 @@ Bio: ${expert.bio}
 
                 {/* Buttons */}
                 <div className="space-y-2">
+                  {isOwner ? (
+                    <div style={{ backgroundColor: '#FAFBF9', border: '1px solid #E5E7EB', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
+                      <p style={{ fontSize: '11px', color: '#6B7280', fontWeight: 700, marginBottom: '12px', lineHeight: 1.5 }}>This is your public expert profile. You can update your details at any time.</p>
+                      <motion.button
+                        whileHover={{ scale: 1.04, boxShadow: '0 12px 40px rgba(14,181,154,0.3)' }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => navigate('/expert-profile')}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'linear-gradient(135deg, #134e40, #0eb59a)',
+                          color: 'white',
+                          fontSize: '14px',
+                          fontWeight: 900,
+                          borderRadius: '14px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 15px rgba(14,181,154,0.15)',
+                        }}
+                      >
+                        <Edit size={14} /> Edit Profile
+                      </motion.button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Invite to Role */}
+                      <motion.button
+                        whileHover={{ scale: 1.04, boxShadow: '0 12px 40px rgba(20,78,64,0.4)' }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => setShowInviteModal(true)}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'linear-gradient(135deg, #134e40, #0eb59a)',
+                          color: 'white',
+                          fontSize: '14px',
+                          fontWeight: 900,
+                          borderRadius: '16px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 15px rgba(20,78,64,0.25)',
+                        }}
+                      >
+                        <Zap size={14} fill="currentColor" /> Invite to Role
+                      </motion.button>
 
-                  {/* Invite to Role */}
-                  <motion.button
-                    whileHover={{ scale: 1.04, boxShadow: '0 12px 40px rgba(20,78,64,0.4)' }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => setShowInviteModal(true)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      background: 'linear-gradient(135deg, #134e40, #0eb59a)',
-                      color: 'white',
-                      fontSize: '14px',
-                      fontWeight: 900,
-                      borderRadius: '16px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 15px rgba(20,78,64,0.25)',
-                    }}
-                  >
-                    <Zap size={14} fill="currentColor" /> Invite to Role
-                  </motion.button>
+                      {/* Send Message */}
+                      <motion.button
+                        whileHover={{ scale: 1.03, backgroundColor: '#F0FDF4', borderColor: '#0eb59a', color: '#134e40' }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setShowMessageModal(true)}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          backgroundColor: '#F9FAFB',
+                          color: '#374151',
+                          fontSize: '14px',
+                          fontWeight: 900,
+                          borderRadius: '16px',
+                          border: '1px solid #E5E7EB',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <MessageSquare size={14} /> Send Message
+                      </motion.button>
 
-                  {/* Send Message */}
-                  <motion.button
-                    whileHover={{ scale: 1.03, backgroundColor: '#F0FDF4', borderColor: '#0eb59a', color: '#134e40' }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setShowMessageModal(true)}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      backgroundColor: '#F9FAFB',
-                      color: '#374151',
-                      fontSize: '14px',
-                      fontWeight: 900,
-                      borderRadius: '16px',
-                      border: '1px solid #E5E7EB',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                    }}
-                  >
-                    <MessageSquare size={14} /> Send Message
-                  </motion.button>
+                      {/* Shortlist + Compare row */}
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setIsShortlisted(!isShortlisted)}
+                          style={{
+                            flex: 1,
+                            padding: '10px',
+                            backgroundColor: isShortlisted ? '#FEF2F2' : '#F9FAFB',
+                            color: isShortlisted ? '#EF4444' : '#6B7280',
+                            fontSize: '13px',
+                            fontWeight: 900,
+                            borderRadius: '14px',
+                            border: `1px solid ${isShortlisted ? '#FECACA' : '#E5E7EB'}`,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <Heart size={13} fill={isShortlisted ? 'currentColor' : 'none'} />
+                          {isShortlisted ? 'Shortlisted' : 'Shortlist'}
+                        </motion.button>
 
-                  {/* Shortlist + Compare row */}
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsShortlisted(!isShortlisted)}
-                      style={{
-                        flex: 1,
-                        padding: '10px',
-                        backgroundColor: isShortlisted ? '#FEF2F2' : '#F9FAFB',
-                        color: isShortlisted ? '#EF4444' : '#6B7280',
-                        fontSize: '13px',
-                        fontWeight: 900,
-                        borderRadius: '14px',
-                        border: `1px solid ${isShortlisted ? '#FECACA' : '#E5E7EB'}`,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      <Heart size={13} fill={isShortlisted ? 'currentColor' : 'none'} />
-                      {isShortlisted ? 'Shortlisted' : 'Shortlist'}
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.05, backgroundColor: '#EFF6FF', borderColor: '#93C5FD', color: '#3B82F6' }}
-                      whileTap={{ scale: 0.95 }}
-                      style={{
-                        flex: 1,
-                        padding: '10px',
-                        backgroundColor: '#F9FAFB',
-                        color: '#6B7280',
-                        fontSize: '13px',
-                        fontWeight: 900,
-                        borderRadius: '14px',
-                        border: '1px solid #E5E7EB',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <BarChart2 size={13} /> Compare
-                    </motion.button>
-                  </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05, backgroundColor: '#EFF6FF', borderColor: '#93C5FD', color: '#3B82F6' }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{
+                            flex: 1,
+                            padding: '10px',
+                            backgroundColor: '#F9FAFB',
+                            color: '#6B7280',
+                            fontSize: '13px',
+                            fontWeight: 900,
+                            borderRadius: '14px',
+                            border: '1px solid #E5E7EB',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <BarChart2 size={13} /> Compare
+                        </motion.button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

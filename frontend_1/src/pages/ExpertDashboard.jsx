@@ -65,14 +65,44 @@ const MagneticCard = ({ children, className, onClick }) => {
 const ExpertDashboard = () => {
   const navigate = useNavigate();
 
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndFetch = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) navigate('/signin?role=expert');
+      if (!session) {
+        navigate('/signin?role=expert');
+        return;
+      }
+
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${baseUrl}/api/expert/profile`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+        } else {
+          console.warn("No expert profile found, using defaults");
+        }
+      } catch (err) {
+        console.error("Error fetching expert profile:", err);
+      } finally {
+        setLoadingProfile(false);
+      }
     };
-    checkAuth();
+
+    checkAuthAndFetch();
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) navigate('/signin?role=expert');
+      if (!session) {
+        navigate('/signin?role=expert');
+      }
     });
     return () => authListener?.subscription?.unsubscribe();
   }, [navigate]);
@@ -285,88 +315,29 @@ const ExpertDashboard = () => {
     { title: 'New Message', desc: 'Acme Corp sent you a message about the investor deck', time: '1 day ago', unread: false, color: 'bg-slate-400' },
   ];
 
-  const profileStrength = 78;
+  const profileStrength = profile ? Math.round((
+    [
+      profile.full_name,
+      profile.headline,
+      profile.primary_domain,
+      profile.years_experience,
+      profile.current_role,
+      profile.key_skills,
+      profile.services_offered,
+      profile.hourly_rate,
+      profile.profile_url,
+      profile.resume_url,
+      profile.phone
+    ].filter(Boolean).length / 11
+  ) * 100) : 78;
+
   const profileTips = [
-    { label: 'Add a profile photo', done: true },
-    { label: 'Complete work experience', done: true },
-    { label: 'Add case studies', done: true },
-    { label: 'Set your rate card', done: false },
-    { label: 'Add 3 client testimonials', done: false },
+    { label: 'Basic info complete', done: !!(profile?.full_name && profile?.headline) },
+    { label: 'Work experience added', done: !!(profile?.years_experience || profile?.current_role) },
+    { label: 'Skills added', done: !!profile?.key_skills },
+    { label: 'Rate card set', done: !!profile?.hourly_rate },
+    { label: 'Resume uploaded', done: !!profile?.resume_url },
   ];
-
-  // ── AUTO-PLAY CAROUSEL LOGIC ──
-  const startProgress = useCallback(() => {
-    if (progressRef.current) {
-      cancelAnimationFrame(progressRef.current);
-    }
-    setAutoPlayProgress(0);
-    progressStartRef.current = Date.now();
-
-    const updateProgress = () => {
-      const elapsed = Date.now() - progressStartRef.current;
-      const progress = Math.min((elapsed / AUTO_PLAY_INTERVAL) * 100, 100);
-      setAutoPlayProgress(progress);
-
-      if (elapsed < AUTO_PLAY_INTERVAL) {
-        progressRef.current = requestAnimationFrame(updateProgress);
-      }
-    };
-
-    progressRef.current = requestAnimationFrame(updateProgress);
-  }, []);
-
-  const stopProgress = useCallback(() => {
-    if (progressRef.current) {
-      cancelAnimationFrame(progressRef.current);
-      progressRef.current = null;
-    }
-    setAutoPlayProgress(0);
-  }, []);
-
-  const startAutoPlay = useCallback(() => {
-    if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
-    }
-    startProgress();
-
-    autoPlayRef.current = setInterval(() => {
-      setOpportunityCarouselIndex((prevIndex) => {
-        const nextIndex = prevIndex + 1 >= recommendedOpportunities.length - itemsPerView + 1 ? 0 : prevIndex + 1;
-        const dir = nextIndex === 0 && prevIndex !== 0 ? -1 : 1;
-        setCarouselDirection(dir);
-        return nextIndex;
-      });
-      startProgress();
-    }, AUTO_PLAY_INTERVAL);
-  }, [itemsPerView, recommendedOpportunities.length, startProgress]);
-
-  const stopAutoPlay = useCallback(() => {
-    if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
-      autoPlayRef.current = null;
-    }
-    stopProgress();
-  }, [stopProgress]);
-
-  useEffect(() => {
-    if (!isCarouselHovered) {
-      startAutoPlay();
-    } else {
-      stopAutoPlay();
-    }
-    return () => stopAutoPlay();
-  }, [isCarouselHovered, startAutoPlay, stopAutoPlay]);
-
-  const handleManualNav = (newIndex) => {
-    const dir = newIndex > opportunityCarouselIndex ? 1 : -1;
-    setCarouselDirection(dir);
-    setOpportunityCarouselIndex(newIndex);
-    stopAutoPlay();
-    if (!isCarouselHovered) startAutoPlay();
-  };
-
-  const canGoLeft = opportunityCarouselIndex > 0;
-  const canGoRight = opportunityCarouselIndex + itemsPerView < recommendedOpportunities.length;
 
   const nextOpportunity = () => {
     if (canGoRight) {
@@ -699,14 +670,20 @@ const ExpertDashboard = () => {
               </AnimatePresence>
             </div>
 
-            {/* Avatar */}
-            <motion.div
-              whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.94 }}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md"
-              style={{ background: 'linear-gradient(135deg, #134e40, #0eb59a)' }}
-            >
-              DC
-            </motion.div>
+            <div className="relative">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/expert-profile')}
+                className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md ring-2 ring-white overflow-hidden"
+              >
+                {profile?.profile_url ? (
+                  <img src={profile.profile_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  profile?.full_name ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'EX'
+                )}
+              </motion.div>
+            </div>
           </div>
         </header>
 
@@ -750,8 +727,8 @@ const ExpertDashboard = () => {
                     style={{ fontFamily: 'Georgia, serif' }}
                   >
                     Good morning,{' '}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#134e40] to-[#0eb59a]">
-                      David.
+                    <span className="text-indigo-600">
+                      {profile?.full_name?.split(' ')[0] || 'Expert'}.
                     </span>{' '}
                     <motion.span
                       animate={{ rotate: [0, 20, -10, 20, 0] }}

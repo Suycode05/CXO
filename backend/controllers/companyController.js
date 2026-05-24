@@ -165,7 +165,9 @@ export const mapDbExpert = (expert, idx = 0) => {
     github: expert.github || "",
     languages: ["English", "Hindi"],
     timezone: "IST (UTC+5:30)",
-    highlights
+    highlights,
+    email: expert.email,
+    user_id: expert.user_id
   };
 };
 
