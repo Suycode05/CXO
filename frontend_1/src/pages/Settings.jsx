@@ -11,7 +11,7 @@ import {
   Eye, EyeOff, RefreshCw, Copy, ExternalLink, Download,
   LayoutDashboard, ShieldCheck, ChevronLeft, ChevronRight as ChevronRightIcon,
   Bell as BellIcon, Settings as SettingsIcon, BarChart2 as BarChart2Icon,
-  FileText
+  FileText, MessageSquare, Calendar
 } from 'lucide-react';
 
 const Settings = () => {
@@ -35,9 +35,9 @@ const Settings = () => {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const paymentTypes = [
-    { id: 'netbanking', label: 'Net Banking', icon: '🏦', desc: 'Add your bank account for auto-debit', fields: ['Bank Name', 'Account Number', 'IFSC Code'] },
-    { id: 'upi', label: 'UPI', icon: '🔵', desc: 'Link your UPI ID for instant payments', fields: ['UPI ID'] },
-    { id: 'card', label: 'Credit / Debit Card', icon: '💳', desc: 'Add card details (2% processing fee)', fields: ['Card Number', 'Expiry', 'CVV', 'Name on Card'] },
+    { id: 'netbanking', label: 'Net Banking', icon: Building, desc: 'Add your bank account for auto-debit', fields: ['Bank Name', 'Account Number', 'IFSC Code'] },
+    { id: 'upi', label: 'UPI', icon: Zap, desc: 'Link your UPI ID for instant payments', fields: ['UPI ID'] },
+    { id: 'card', label: 'Credit / Debit Card', icon: CreditCard, desc: 'Add card details (2% processing fee)', fields: ['Card Number', 'Expiry', 'CVV', 'Name on Card'] },
   ];
 
   const handleAddPayment = () => {
@@ -164,7 +164,8 @@ const Settings = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2Icon, label: 'Analytics', path: '/analytics' },
-    { icon: SettingsIcon, label: 'Settings', path: '/settings', active: true },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const appNotifications = [
@@ -421,7 +422,12 @@ const Settings = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
         <motion.button
           animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -445,12 +451,12 @@ const Settings = () => {
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate(item.path)}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
-              item.active
+              item.active || window.location.pathname === item.path
                 ? 'bg-[#134e40] text-white shadow-md'
                 : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
             }`}
           >
-            {item.active && (
+            {(item.active || window.location.pathname === item.path) && (
               <motion.div
                 layoutId="activeNav"
                 className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
@@ -460,32 +466,77 @@ const Settings = () => {
             <motion.span
               animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden whitespace-nowrap text-sm font-bold"
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
               {item.label}
             </motion.span>
           </motion.button>
         ))}
 
-        {/* Sign Out at bottom */}
-        <div className="pt-2 border-t border-gray-50 mt-2">
+      </nav>
+
+      {/* Separated Settings option pinned to the bottom */}
+      <div className="p-3 border-t border-gray-50 space-y-1">
+        <motion.button
+          whileHover={{ x: 2, transition: { duration: 0.15 } }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/settings')}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+            window.location.pathname === '/settings'
+              ? 'bg-[#134e40] text-white shadow-md'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+          }`}
+        >
+          {window.location.pathname === '/settings' && (
+            <motion.div
+              layoutId="activeNav"
+              className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+            />
+          )}
+          <SettingsIcon size={17} className="shrink-0" />
+          <motion.span
+            animate={{ 
+              opacity: isSidebarOpen ? 1 : 0, 
+              width: isSidebarOpen ? 'auto' : 0 
+            }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+          >
+            Settings
+          </motion.span>
+        </motion.button>
+
+        {window.location.pathname === '/settings' && (
           <motion.button
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
             whileHover={{ x: 2, transition: { duration: 0.15 } }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/signin?role=company')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_company') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_company');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=company');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
           >
             <LogOut size={17} className="shrink-0" />
             <motion.span
-              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden whitespace-nowrap text-sm font-bold"
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
               Sign Out
             </motion.span>
           </motion.button>
-        </div>
-      </nav>
+        )}
+      </div>
     </motion.aside>
 
     {/* ── MAIN CONTENT ── */}
@@ -1683,7 +1734,7 @@ const Settings = () => {
                                 : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                             }`}
                           >
-                            <div className="text-xl mb-1">{type.icon}</div>
+                            <type.icon className={`mx-auto mb-1.5 ${selectedPaymentType === type.id ? 'text-blue-600' : 'text-gray-400'}`} size={20} />
                             <p className={`text-[11px] font-black ${selectedPaymentType === type.id ? 'text-blue-700' : 'text-gray-600'}`}>
                               {type.label}
                             </p>

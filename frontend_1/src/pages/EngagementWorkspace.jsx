@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,10 +15,12 @@ import {
   Bell, Settings, ShieldCheck, ChevronLeft, Users as UsersIcon,
   BarChart2 as BarChart2Icon, LogOut, Plus
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 const EngagementWorkspace = () => {
   const navigate = useNavigate();
   const { engagementId } = useParams();
+  const location = useLocation();
 
   // Authentication Guard
   useEffect(() => {
@@ -64,6 +66,18 @@ const EngagementWorkspace = () => {
 
   const [companyProfile, setCompanyProfile] = useState(null);
   const [activeTab, setActiveTab] = useState('Overview');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      const formattedTab = tabParam.charAt(0).toUpperCase() + tabParam.slice(1).toLowerCase();
+      const validTabs = ['Overview', 'Milestones', 'Messages', 'Documents', 'Payments'];
+      if (validTabs.includes(formattedTab)) {
+        setActiveTab(formattedTab);
+      }
+    }
+  }, [location]);
   const [messageText, setMessageText] = useState('');
   const [showApproveModal, setShowApproveModal] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(null);
@@ -123,8 +137,8 @@ const EngagementWorkspace = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: ShieldCheck, label: 'PMO Services', path: '/pmo' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const notifications = [
@@ -382,7 +396,12 @@ const EngagementWorkspace = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -400,25 +419,101 @@ const EngagementWorkspace = () => {
           {isSidebarOpen && (
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
           )}
-          {navItems.map((item) => (
-            <motion.button
-              key={item.path}
-              whileHover={{ x: 3, transition: { duration: 0.15 } }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => navigate(item.path)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 text-gray-500 hover:bg-gray-50 hover:text-[#134e40]"
-            >
-              <item.icon size={17} className="shrink-0" />
-              <motion.span
-                animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold"
+          {navItems.map((item) => {
+            const isActive = item.active || window.location.pathname === item.path || (item.path === '/engagements' && window.location.pathname.startsWith('/engagements')) || (item.path === '/requirements' && window.location.pathname.startsWith('/requirements')) || (item.path === '/experts' && window.location.pathname.startsWith('/experts'));
+            return (
+              <motion.button
+                key={item.path}
+                whileHover={{ x: 2, transition: { duration: 0.15 } }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+                  isActive
+                    ? 'bg-[#134e40] text-white shadow-md'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                }`}
               >
-                {item.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                  />
+                )}
+                <item.icon size={17} className="shrink-0" />
+                <motion.span
+                  animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+                >
+                  {item.label}
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
+            <motion.button
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ x: 2, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+            >
+              <LogOut size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                Sign Out
               </motion.span>
             </motion.button>
-          ))}
-        </nav>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
@@ -653,9 +748,10 @@ const EngagementWorkspace = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.07 }}
                         whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.08)', transition: { duration: 0.2 } }}
-                        className={`bg-white rounded-2xl p-4 border-l-4 ${kpi.border} cursor-default`}
+                        className={`bg-white rounded-2xl p-4 border-l-4 ${kpi.border} cursor-default relative overflow-hidden`}
                         style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
                       >
+                        <FormalCardBorder />
                         {/* Icon + label inline */}
                         <div className="flex items-center gap-2 mb-2">
                           <div className={`w-6 h-6 ${kpi.iconBg} rounded-md flex items-center justify-center shrink-0`}>
@@ -669,7 +765,8 @@ const EngagementWorkspace = () => {
                   </div>
 
                   {/* ── ENGAGEMENT PROGRESS ── */}
-                  <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
+                  <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
+                    <FormalCardBorder />
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 text-left">
                         <BarChart2 size={15} className="text-[#0eb59a]" /> Engagement Progress
@@ -707,7 +804,8 @@ const EngagementWorkspace = () => {
                   </div>
 
                   {/* ── MILESTONE SUMMARY ── */}
-                  <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
+                  <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
+                    <FormalCardBorder />
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 text-left">
                         <CheckCircle size={15} className="text-[#0eb59a]" /> Milestone Summary
@@ -771,8 +869,9 @@ const EngagementWorkspace = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
                     whileHover={{ y: -2, transition: { duration: 0.15 } }}
-                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm transition-all text-left"
+                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm transition-all text-left relative overflow-hidden"
                   >
+                    <FormalCardBorder />
                     <h3 className="font-black text-gray-900 text-sm mb-3 flex items-center gap-1.5 text-left">
                       <Users size={14} className="text-[#0eb59a]" /> Expert Details
                     </h3>
@@ -853,8 +952,9 @@ const EngagementWorkspace = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
                     whileHover={{ y: -2, transition: { duration: 0.15 } }}
-                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm transition-all text-left"
+                    className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm transition-all text-left relative overflow-hidden"
                   >
+                    <FormalCardBorder />
                     <h3 className="font-black text-gray-900 text-sm mb-3 text-left">Quick Actions</h3>
                     <div className="space-y-1">
                       {[
@@ -1058,8 +1158,9 @@ const EngagementWorkspace = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="flex flex-col h-[calc(100vh-240px)] sm:h-[calc(100vh-280px)] bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+                className="flex flex-col h-[calc(100vh-240px)] sm:h-[calc(100vh-280px)] bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden relative"
               >
+                <FormalCardBorder />
                 {/* Chat Header */}
                 <div className="flex items-center gap-3 p-5 border-b border-gray-100 bg-gray-50/50 text-left">
                   <div className="relative">
@@ -1188,7 +1289,8 @@ const EngagementWorkspace = () => {
                           {catDocs.length}
                         </span>
                       </h3>
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-left">
+                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-left relative">
+                        <FormalCardBorder />
                         {catDocs.map((doc, idx) => {
                           const fileInfo = getFileIcon(doc.type);
                           return (
@@ -1294,7 +1396,8 @@ const EngagementWorkspace = () => {
                 </div>
 
                 {/* Payment Table */}
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-left">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-left relative">
+                  <FormalCardBorder />
                   <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between text-left">
                     <h3 className="font-black text-gray-900 text-sm text-left">Payment Schedule</h3>
                     <motion.button

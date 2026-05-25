@@ -11,6 +11,7 @@ import {
   CheckCircle, LayoutDashboard, CreditCard, FileText,
   LogOut, Settings, ShieldCheck, Bell, ChevronLeft
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 const ExpertDiscovery = () => {
   const navigate = useNavigate();
@@ -137,7 +138,8 @@ const ExpertDiscovery = () => {
     { icon: Users, label: 'Experts', path: '/experts', active: true },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   // ── DATA ──
@@ -444,7 +446,12 @@ const ExpertDiscovery = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -462,38 +469,104 @@ const ExpertDiscovery = () => {
           {isSidebarOpen && (
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
           )}
-          {navItems.map((item) => (
+          {navItems.map((item) => {
+            const isActive = item.active || window.location.pathname === item.path || (item.path === '/experts' && window.location.pathname.startsWith('/experts'));
+            return (
+              <motion.button
+                key={item.path}
+                whileHover={{ x: 2, transition: { duration: 0.15 } }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+                  isActive
+                    ? 'bg-[#134e40] text-white shadow-md'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                  />
+                )}
+                <item.icon size={17} className="shrink-0" />
+                <motion.span
+                  animate={{ 
+                    opacity: isSidebarOpen ? 1 : 0, 
+                    width: isSidebarOpen ? 'auto' : 0 
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+                >
+                  {item.label}
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
             <motion.button
-              key={item.path}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
               whileHover={{ x: 2, transition: { duration: 0.15 } }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
-                item.active
-                  ? 'bg-[#134e40] text-white shadow-md'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-              }`}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
             >
-              {item.active && (
-                <motion.div
-                  layoutId="activeNav"
-                  className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
-                />
-              )}
-              <item.icon size={17} className="shrink-0" />
+              <LogOut size={17} className="shrink-0" />
               <motion.span
                 animate={{ 
                   opacity: isSidebarOpen ? 1 : 0, 
                   width: isSidebarOpen ? 'auto' : 0 
                 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold"
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
               >
-                {item.label}
+                Sign Out
               </motion.span>
             </motion.button>
-          ))}
-        </nav>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
@@ -874,14 +947,15 @@ const ExpertDiscovery = () => {
                               {/* ── BASE CARD ── */}
                               <motion.div
                                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                                className={`bg-white rounded-2xl border transition-all duration-200 overflow-visible cursor-pointer
+                                className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden relative cursor-pointer
                                   ${isHovered
                                     ? 'border-[#0eb59a]/40 shadow-[0_12px_40px_rgba(14,181,154,0.12)]'
                                     : 'border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-gray-200'
                                   }
                                 `}
                               >
-                                <div className="p-5">
+                                <FormalCardBorder />
+                                <div className="p-5 relative z-10">
 
                                   {/* Top badges row */}
                                   <div className="flex items-center gap-1.5 mb-4">

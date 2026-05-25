@@ -72,8 +72,8 @@ const ExpertProfile = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: ShieldCheck, label: 'PMO Services', path: '/pmo' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
   const [isShortlisted, setIsShortlisted] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -498,7 +498,9 @@ Bio: ${expert.bio}
         {/* Brand */}
         <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
           <motion.div whileHover={{ scale: 1.05, rotate: 2 }} whileTap={{ scale: 0.95 }}
-            className="w-9 h-9 bg-gradient-to-br from-[#134e40] to-[#0eb59a] rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md overflow-hidden shrink-0">
+            onClick={() => window.location.reload()}
+            className="w-9 h-9 bg-gradient-to-br from-[#134e40] to-[#0eb59a] rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md overflow-hidden shrink-0 cursor-pointer"
+          >
             {companyProfile?.logo_url ? (
               <img src={companyProfile.logo_url} alt="Logo" className="w-full h-full object-cover" />
             ) : (
@@ -534,7 +536,7 @@ Bio: ${expert.bio}
             </p>
           )}
           {navItems.map((item) => {
-            const isActive = item.path === '/experts';
+            const isActive = item.active || window.location.pathname === item.path || (item.path === '/experts' && window.location.pathname.startsWith('/experts'));
             return (
               <motion.button
                 key={item.path}
@@ -556,7 +558,7 @@ Bio: ${expert.bio}
                 <motion.span
                   animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
                   transition={{ duration: 0.2 }}
-                  className="overflow-hidden whitespace-nowrap text-sm font-bold"
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
                 >
                   {item.label}
                 </motion.span>
@@ -564,6 +566,38 @@ Bio: ${expert.bio}
             );
           })}
         </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNavBar"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}

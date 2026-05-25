@@ -8,7 +8,7 @@ import {
   Clock, CreditCard, Plus, Eye, Shield,
   FileText, ChevronDown, Target, Wallet,
   BarChart2, IndianRupee, Building, Star,
-  CheckCircle, ArrowDownLeft, Landmark, Send
+  CheckCircle, ArrowDownLeft, Landmark, Send, Zap
 } from 'lucide-react';
 
 const ExpertEarnings = () => {
@@ -183,7 +183,7 @@ const ExpertEarnings = () => {
       id: 'bank',
       label: 'HDFC Bank',
       detail: 'Savings ••••4321',
-      icon: '🏦',
+      icon: Building,
       verified: true,
       default: true,
     },
@@ -191,7 +191,7 @@ const ExpertEarnings = () => {
       id: 'upi',
       label: 'UPI',
       detail: 'david@hdfcbank',
-      icon: '🔵',
+      icon: Zap,
       verified: true,
       default: false,
     },
@@ -894,7 +894,7 @@ const ExpertEarnings = () => {
                         whileHover={{ x: 3 }}
                         className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-[#0eb59a]/30 hover:bg-teal-50/30 transition-all cursor-pointer"
                       >
-                        <span className="text-2xl shrink-0">{account.icon}</span>
+                        <account.icon className="text-gray-400 shrink-0" size={22} />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className="font-black text-gray-900 text-sm">{account.label}</p>
@@ -1070,7 +1070,7 @@ const ExpertEarnings = () => {
                                 : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                             }`}
                           >
-                            <span className="text-xl shrink-0">{account.icon}</span>
+                            <account.icon className="text-gray-400 shrink-0" size={20} />
                             <div className="flex-1">
                               <p className={`text-sm font-black ${selectedPayout === account.id ? 'text-[#134e40]' : 'text-gray-700'}`}>
                                 {account.label}

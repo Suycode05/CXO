@@ -667,7 +667,11 @@ const ExpertSettings = () => {
                             <div className="flex items-center gap-3">
                               <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 ${account.default ? 'bg-teal-100' : 'bg-gray-100'
                                 }`}>
-                                {account.type === 'bank' ? '🏦' : '🔵'}
+                                {account.type === 'bank' ? (
+                                  <Building size={18} className={account.default ? 'text-[#134e40]' : 'text-gray-500'} />
+                                ) : (
+                                  <Zap size={18} className={account.default ? 'text-[#134e40]' : 'text-gray-500'} />
+                                )}
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">

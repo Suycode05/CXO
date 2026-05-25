@@ -9,8 +9,9 @@ import {
   DollarSign, Activity, Download, Eye, Award, Layers,
   TrendingUp, TrendingDown, AlertTriangle, Shield,
   Clipboard, AlertCircle, CheckSquare, XCircle,
-  BarChart, PieChart, Flag, BookOpen
+  BarChart, PieChart, Flag, BookOpen, LogOut, MessageSquare, Calendar, ShieldCheck
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 // ── ANIMATED COUNTER ──
 const AnimatedNumber = ({ value, suffix = '' }) => {
@@ -68,7 +69,7 @@ const DonutChart = ({ segments, size = 100, strokeWidth = 12 }) => {
   const r = (size - strokeWidth) / 2, circ = 2 * Math.PI * r, center = size / 2;
   let offset = 0;
   return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }} className="overflow-visible">
       <circle cx={center} cy={center} r={r} fill="none" stroke="#F1F5F2" strokeWidth={strokeWidth} />
       {segments.map((seg, i) => {
         const dash = (seg.value / 100) * circ, gap = circ - dash;
@@ -80,6 +81,8 @@ const DonutChart = ({ segments, size = 100, strokeWidth = 12 }) => {
             strokeLinecap="round"
             initial={{ strokeDasharray: `0 ${circ}` }}
             animate={{ strokeDasharray: `${dash} ${gap}` }}
+            whileHover={{ strokeWidth: strokeWidth + 3, filter: 'brightness(1.05)', scale: 1.03 }}
+            style={{ originX: `${center}px`, originY: `${center}px`, cursor: 'pointer' }}
             transition={{ duration: 1.2, delay: i * 0.2, ease: 'easeOut' }} />
         );
         offset += seg.value;
@@ -91,10 +94,11 @@ const DonutChart = ({ segments, size = 100, strokeWidth = 12 }) => {
 
 // ── PROGRESS BAR ──
 const ProgressBar = ({ value, color = '#0eb59a', delay = 0, thick = false }) => (
-  <div className={`w-full ${thick ? 'h-3' : 'h-2'} bg-gray-100 rounded-full overflow-hidden`}>
+  <div className={`w-full ${thick ? 'h-3' : 'h-2'} bg-gray-100 rounded-full overflow-hidden relative shadow-inner my-2.5`}>
     <motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }}
+      whileHover={{ filter: 'brightness(1.1)' }}
       transition={{ duration: 1, delay, ease: 'easeOut' }}
-      style={{ height: '100%', backgroundColor: color, borderRadius: '999px' }} />
+      style={{ height: '100%', backgroundColor: color, borderRadius: '999px', cursor: 'pointer' }} />
   </div>
 );
 
@@ -128,6 +132,43 @@ const SectionHeading = ({ icon: Icon, label, iconBg = 'bg-teal-50', iconColor = 
     </div>
     {label}
   </h3>
+);
+
+// ── REUSABLE CARD WRAPPER ──
+const Card = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-2xl relative overflow-hidden ${className}`} style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+    <FormalCardBorder />
+    {children}
+  </div>
+);
+
+// ── KPI STRIP (reused in multiple tabs) ──
+const KpiStrip = ({ items }) => (
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    {items.map((s, idx) => (
+      <motion.div key={idx}
+        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.06 }}
+        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        className={`bg-white rounded-2xl p-5 border-l-4 ${s.border} cursor-default relative overflow-hidden`}
+        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+        <FormalCardBorder />
+        {s.icon && (
+          <div className={`w-8 h-8 ${s.bg || 'bg-gray-50'} rounded-xl flex items-center justify-center mb-3 relative z-10`}>
+            <s.icon size={15} className={s.iconColor || 'text-gray-400'} />
+          </div>
+        )}
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 relative z-10">{s.label}</p>
+        <p className={`${s.large ? 'text-3xl' : 'text-2xl'} font-black ${s.numColor} mb-1 relative z-10`}>{s.value}</p>
+        {s.sub && <p className="text-[10px] text-gray-400 relative z-10">{s.sub}</p>}
+        {s.progress !== undefined && (
+          <div className="mt-3 relative z-10">
+            <ProgressBar value={s.progress} color={s.progressColor || '#0eb59a'} delay={0.3 + idx * 0.1} />
+          </div>
+        )}
+      </motion.div>
+    ))}
+  </div>
 );
 
 const Analytics = () => {
@@ -188,7 +229,8 @@ const Analytics = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics', active: true },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const appNotifs = [
@@ -385,41 +427,6 @@ const Analytics = () => {
     a.click();
   };
 
-  // ── REUSABLE CARD WRAPPER ──
-  const Card = ({ children, className = '' }) => (
-    <div className={`bg-white rounded-2xl ${className}`} style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-      {children}
-    </div>
-  );
-
-  // ── KPI STRIP (reused in multiple tabs) ──
-  const KpiStrip = ({ items }) => (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {items.map((s, idx) => (
-        <motion.div key={idx}
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.06 }}
-          whileHover={{ y: -4, transition: { duration: 0.2 } }}
-          className={`bg-white rounded-2xl p-5 border-l-4 ${s.border} cursor-default`}
-          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-          {s.icon && (
-            <div className={`w-8 h-8 ${s.bg || 'bg-gray-50'} rounded-xl flex items-center justify-center mb-3`}>
-              <s.icon size={15} className={s.iconColor || 'text-gray-400'} />
-            </div>
-          )}
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{s.label}</p>
-          <p className={`${s.large ? 'text-3xl' : 'text-2xl'} font-black ${s.numColor} mb-1`}>{s.value}</p>
-          {s.sub && <p className="text-[10px] text-gray-400">{s.sub}</p>}
-          {s.progress !== undefined && (
-            <div className="mt-3">
-              <ProgressBar value={s.progress} color={s.progressColor || '#0eb59a'} delay={0.3 + idx * 0.1} />
-            </div>
-          )}
-        </motion.div>
-      ))}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-[#f4f7f5]">
 
@@ -436,7 +443,12 @@ const Analytics = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
@@ -446,21 +458,107 @@ const Analytics = () => {
           </motion.button>
         </div>
         <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-hidden">
-          {isSidebarOpen && <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>}
-          {navItems.map((item) => (
-            <motion.button key={item.path}
+          {isSidebarOpen && (
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
+          )}
+          {navItems.map((item) => {
+            const isActive = item.active || window.location.pathname === item.path || (item.path === '/experts' && window.location.pathname.startsWith('/experts'));
+            return (
+              <motion.button
+                key={item.path}
+                whileHover={{ x: 2, transition: { duration: 0.15 } }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+                  isActive
+                    ? 'bg-[#134e40] text-white shadow-md'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                  />
+                )}
+                <item.icon size={17} className="shrink-0" />
+                <motion.span
+                  animate={{ 
+                    opacity: isSidebarOpen ? 1 : 0, 
+                    width: isSidebarOpen ? 'auto' : 0 
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+                >
+                  {item.label}
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
+            <motion.button
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
               whileHover={{ x: 2, transition: { duration: 0.15 } }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${item.active ? 'bg-[#134e40] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'}`}>
-              {item.active && <motion.div layoutId="activeNav" className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full" />}
-              <item.icon size={17} className="shrink-0" />
-              <motion.span animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }} transition={{ duration: 0.2 }} className="overflow-hidden whitespace-nowrap text-sm font-bold">
-                {item.label}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+            >
+              <LogOut size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                Sign Out
               </motion.span>
             </motion.button>
-          ))}
-        </nav>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN ── */}
@@ -736,6 +834,7 @@ const Analytics = () => {
                       whileHover={{ y: -5, boxShadow: `0 16px 40px ${item.glow}20`, transition: { duration: 0.2 } }}
                       className={`bg-white rounded-2xl p-5 border-l-4 ${item.border} cursor-default group relative overflow-hidden`}
                       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                      <FormalCardBorder />
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         style={{ background: `radial-gradient(circle at 0% 100%, ${item.glow}10 0%, transparent 60%)` }} />
                       <div className="relative z-10">
@@ -769,6 +868,7 @@ const Analytics = () => {
                       whileHover={{ y: -4, boxShadow: `0 20px 50px ${eng.color}15`, transition: { duration: 0.2 } }}
                       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
                       className="bg-white rounded-2xl p-5 cursor-default group relative overflow-hidden">
+                      <FormalCardBorder />
                       <div className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(90deg, ${eng.color}, transparent)` }} />
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -874,18 +974,22 @@ const Analytics = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                   <Card className="lg:col-span-2 p-5">
                     <SectionHeading icon={BarChart} label="Monthly Spend Trend" />
-                    <div className="flex items-end gap-3 h-44 px-2 mt-5">
+                    <div className="flex items-end gap-3 h-44 px-2 mt-6 mb-4">
                       {monthlySpend.map((bar, idx) => (
-                        <div key={bar.month} className="flex-1 flex flex-col items-center gap-2 cursor-default">
-                          <span className="text-[10px] font-black text-[#134e40]">{bar.amount > 0 ? `₹${bar.amount/100}L` : '—'}</span>
+                        <motion.div key={bar.month} 
+                          whileHover={{ y: -5, scale: 1.05 }}
+                          className="flex-1 flex flex-col items-center gap-2 cursor-pointer group"
+                        >
+                          <span className="text-[10px] font-black text-[#134e40] opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1">{bar.amount > 0 ? `₹${bar.amount/100}L` : '—'}</span>
                           <div className="w-full flex flex-col justify-end" style={{ height: '110px' }}>
                             <motion.div initial={{ height: 0 }} animate={{ height: bar.amount > 0 ? `${(bar.amount / maxMonthly) * 110}px` : '4px' }}
                               transition={{ duration: 0.8, delay: idx * 0.1, ease: 'easeOut' }}
+                              whileHover={{ filter: 'brightness(1.1)' }}
                               style={{ borderRadius: '6px 6px 3px 3px' }}
-                              className={`w-full ${bar.amount > 0 ? 'bg-gradient-to-t from-[#134e40] to-[#0eb59a]' : 'bg-gray-100'}`} />
+                              className={`w-full shadow-sm group-hover:shadow-md transition-shadow ${bar.amount > 0 ? 'bg-gradient-to-t from-[#134e40] to-[#0eb59a]' : 'bg-gray-100'}`} />
                           </div>
-                          <span className="text-[10px] font-bold text-gray-400">{bar.month}</span>
-                        </div>
+                          <span className="text-[10px] font-bold text-gray-400 group-hover:text-gray-900 transition-colors mt-1">{bar.month}</span>
+                        </motion.div>
                       ))}
                     </div>
                   </Card>
@@ -994,15 +1098,25 @@ const Analytics = () => {
                             </div>
                             <span className="ml-auto text-xs font-black text-[#0eb59a] bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">{exp.overallScore}%</span>
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-3 mt-3.5">
                             {[{ l: 'Quality', v: exp.qualityScore, c: '#0eb59a' },{ l: 'Delivery', v: exp.deliveryScore, c: '#3B82F6' },{ l: 'Communication', v: exp.communicationScore, c: '#8B5CF6' }].map((sc, i) => (
-                              <div key={i} className="flex items-center gap-2">
-                                <span className="text-[9px] font-bold text-gray-500 w-16 text-left">{sc.l}</span>
-                                <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                                  <div className="h-full rounded-full" style={{ width: `${sc.v}%`, backgroundColor: sc.c }} />
+                              <motion.div key={i}
+                                whileHover={{ scale: 1.02 }}
+                                className="flex items-center gap-3.5 py-0.5 group cursor-default transition-all"
+                              >
+                                <span className="text-[10px] font-bold text-gray-500 w-24 pr-2 text-left group-hover:text-gray-900 transition-colors leading-none">{sc.l}</span>
+                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden relative shadow-inner">
+                                  <motion.div 
+                                    initial={{ width: 0 }} 
+                                    animate={{ width: `${sc.v}%` }}
+                                    transition={{ duration: 1, delay: i * 0.1, ease: 'easeOut' }}
+                                    whileHover={{ filter: 'brightness(1.1)' }}
+                                    className="h-full rounded-full" 
+                                    style={{ backgroundColor: sc.c }} 
+                                  />
                                 </div>
-                                <span className="text-[9px] font-black text-gray-500 w-6 text-right">{sc.v}%</span>
-                              </div>
+                                <span className="text-[10px] font-black text-gray-600 w-8 text-right group-hover:scale-110 transition-transform leading-none">{sc.v}%</span>
+                              </motion.div>
                             ))}
                           </div>
                         </div>
@@ -1039,28 +1153,29 @@ const Analytics = () => {
                     <div className="space-y-4.5 mt-5">
                       {roiEngagements.map((item, idx) => (
                         <motion.div key={idx} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}
-                          className="p-3.5 bg-gray-50 border border-gray-100 rounded-xl text-left">
-                          <div className="flex items-center justify-between mb-2">
+                          whileHover={{ scale: 1.015, y: -2 }}
+                          className="p-4 bg-gray-50 border border-gray-100 rounded-xl text-left transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
+                          <div className="flex items-center justify-between mb-3.5">
                             <span className="text-xs font-black text-[#1C3627] text-left">{item.title}</span>
                             <span className="text-xs font-black text-[#0eb59a] bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">{item.roi}% ROI</span>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             <div>
-                              <div className="flex justify-between text-[9px] text-gray-400 mb-0.5">
+                              <div className="flex justify-between text-[9px] text-gray-400 mb-1">
                                 <span className="text-left">Value Delivered</span>
                                 <span className="font-bold text-[#1C3627] text-right">{item.valueDelivered}</span>
                               </div>
                               <ProgressBar value={100} color={item.color} delay={idx * 0.1} />
                             </div>
                             <div>
-                              <div className="flex justify-between text-[9px] text-gray-400 mb-0.5">
+                              <div className="flex justify-between text-[9px] text-gray-400 mb-1">
                                 <span className="text-left">Acquisition Cost</span>
                                 <span className="font-bold text-[#1C3627] text-right">{item.cost}</span>
                               </div>
                               <ProgressBar value={(item.costNum / item.valueNum) * 100} color="#6366f1" delay={idx * 0.15} />
                             </div>
                           </div>
-                          <p className="text-[9px] text-gray-400 mt-2 text-left">Calculated over a {item.period} engagement timeline.</p>
+                          <p className="text-[9px] text-gray-400 mt-2.5 text-left">Calculated over a {item.period} engagement timeline.</p>
                         </motion.div>
                       ))}
                     </div>

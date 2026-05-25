@@ -7,9 +7,10 @@ import {
   ChevronRight, ChevronLeft, Clock, Briefcase, Eye, Zap,
   Award, MessageSquare, User, Check, TrendingUp, Shield,
   BarChart2, CreditCard, Users, Target, Grid, Plus,
-  UserCircle, LogOut, X, Menu, MapPin, CheckCircle
+  UserCircle, LogOut, X, Menu, MapPin, CheckCircle, Calendar
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 // ── ANIMATED COUNTER ──
 const AnimatedCounter = ({ value }) => {
@@ -164,32 +165,33 @@ const ExpertDashboard = () => {
     { name: 'Earnings',       icon: DollarSign,      path: '/expert-earnings'     },
     { name: 'Profile',        icon: UserCircle,      path: '/expert-profile'      },
     { name: 'Analytics',      icon: BarChart2,       path: '/expert-analytics'    },
-    { name: 'Settings',       icon: Settings,        path: '/expert-settings'     },
+    { name: 'Messages',       icon: MessageSquare,   path: '/messages'            },
+    { name: 'Meetings',       icon: Calendar,        path: '/meetings'            },
   ];
 
   const kpis = [
     {
       title: 'Active Engagements', value: '2', trend: '+1 this month',
       icon: Activity, iconBg: 'bg-teal-50', iconColor: 'text-[#0eb59a]',
-      border: 'border-l-[#0eb59a]', numColor: 'text-[#0eb59a]',
+      border: 'border-t-4 border-t-[#0eb59a]', numColor: 'text-[#0eb59a]',
       path: '/expert-engagements',
     },
     {
       title: 'Proposals Sent', value: '8', trend: '3 pending review',
       icon: FileText, iconBg: 'bg-[#f0fdf4]', iconColor: 'text-[#134e40]',
-      border: 'border-l-[#134e40]', numColor: 'text-[#134e40]',
+      border: 'border-t-4 border-t-[#134e40]', numColor: 'text-[#134e40]',
       path: '/expert-opportunities',
     },
     {
       title: 'Total Earned', value: '₹12.4L', trend: '+₹3.5L this month',
       icon: DollarSign, iconBg: 'bg-amber-50', iconColor: 'text-amber-500',
-      border: 'border-l-amber-400', numColor: 'text-amber-500',
+      border: 'border-t-4 border-t-amber-400', numColor: 'text-amber-500',
       path: '/expert-earnings',
     },
     {
       title: 'Profile Views', value: '234', trend: '+48 this week',
       icon: Eye, iconBg: 'bg-emerald-50', iconColor: 'text-[#a855f7]',
-      border: 'border-l-purple-400', numColor: 'text-[#a855f7]',
+      border: 'border-t-4 border-t-purple-400', numColor: 'text-[#a855f7]',
       path: '/expert-profile',
     },
   ];
@@ -551,7 +553,12 @@ const ExpertDashboard = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             whileHover={{ scale: 1.1, backgroundColor: '#f0fdf4' }}
@@ -619,6 +626,41 @@ const ExpertDashboard = () => {
             );
           })}
         </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              setActiveMenu('Settings');
+              navigate('/expert-settings');
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative cursor-pointer text-center ${
+              activeMenu === 'Settings' || window.location.pathname === '/expert-settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {(activeMenu === 'Settings' || window.location.pathname === '/expert-settings') && (
+              <motion.div
+                layoutId="activeNavExpert"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+        </div>
 
 
       </motion.aside>
@@ -893,17 +935,10 @@ const ExpertDashboard = () => {
                 <h1 style={{ fontFamily: 'Georgia, serif' }}
                   className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-2 text-left"
                 >
-                  Good morning,{' '}
+                  Welcome,{' '}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#134e40] to-[#0eb59a]">
                     {profile?.full_name?.split(' ')[0] || 'Expert'}.
-                  </span>{' '}
-                  <motion.span
-                    animate={{ rotate: [0, 20, -10, 20, 0] }}
-                    transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatDelay: 4 }}
-                    className="inline-block"
-                  >
-                    👋
-                  </motion.span>
+                  </span>
                 </h1>
 
                 <p className="text-slate-500 text-base mt-2 font-medium leading-relaxed text-left">
@@ -994,11 +1029,12 @@ const ExpertDashboard = () => {
                   <MagneticCard
                     key={idx}
                     onClick={() => navigate(kpi.path)}
-                    style={{ borderLeftColor: accentColor }}
-                    className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 border-l-[5px] cursor-pointer relative group transition-all duration-200 hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+                    style={{ borderTopColor: accentColor }}
+                    className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 border-t-[5px] cursor-pointer relative group transition-all duration-200 hover:shadow-lg hover:-translate-y-1 overflow-hidden flex flex-col items-center justify-center text-center min-h-[180px]"
                   >
-                    <div className="absolute top-0 left-0 bottom-0 w-[5px] rounded-l-2xl opacity-100"
-                      style={{ background: accentColor }}
+                    <FormalCardBorder />
+                    <div className="absolute top-0 left-0 right-0 h-[5px] rounded-t-2xl opacity-100"
+                       style={{ background: accentColor }}
                     />
                     <div className="absolute inset-0 opacity-[0.02] rounded-2xl"
                       style={{ background: kpi.numColor.includes('amber') ? '#f59e0b' : '#0eb59a' }}
@@ -1007,26 +1043,25 @@ const ExpertDashboard = () => {
                       style={{ background: '#0eb59a' }}
                     />
                     
-                    <div className="relative z-10">
+                    <div className="relative z-10 flex flex-col items-center justify-center text-center w-full">
                       <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 * idx }}
+                        className="flex flex-col items-center w-full"
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-tight pr-2 text-left">{kpi.title}</span>
-                          <div className={`w-8 h-8 ${kpi.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                            <kpi.icon size={15} className={kpi.iconColor} />
-                          </div>
+                        <div className={`w-10 h-10 ${kpi.iconBg} rounded-full flex items-center justify-center shrink-0 mb-3 group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
+                          <kpi.icon size={18} className={kpi.iconColor} />
                         </div>
+                        <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-tight mb-1">{kpi.title}</span>
                         <p className={`text-3xl sm:text-4xl font-black mb-2 tracking-tight ${kpi.numColor}`}>
                           {mounted ? <AnimatedCounter value={kpi.value} /> : kpi.value}
                         </p>
-                        <div className="flex items-center justify-between mt-2 flex-wrap">
-                          <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 w-fit px-2 py-1 rounded-lg">
+                        <div className="flex flex-col items-center gap-1.5 mt-1">
+                          <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg">
                             <ArrowUpRight size={9} /> {kpi.trend}
                           </div>
-                          <svg viewBox="0 0 60 20" className="w-14 h-4 mt-2 opacity-50">
+                          <svg viewBox="0 0 60 20" className="w-14 h-4 mt-1 opacity-50">
                             <polyline
                               points="0,15 10,12 20,14 30,8 40,10 50,5 60,7"
                               fill="none"
@@ -1054,6 +1089,7 @@ const ExpertDashboard = () => {
               transition={{ delay: 0.25 }}
               className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm overflow-hidden relative"
             >
+              <FormalCardBorder />
               <div 
                 className="absolute inset-0 opacity-[0.015]"
                 style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #0eb59a, transparent 50%), radial-gradient(circle at 80% 50%, #134e40, transparent 50%)' }}
@@ -1154,8 +1190,9 @@ const ExpertDashboard = () => {
                   }}
                   whileTap={{ scale: 0.94 }}
                   onClick={() => navigate(action.path)}
-                  className="relative group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-white border border-gray-100 cursor-pointer transition-all duration-200 shadow-sm text-center"
+                  className="relative group flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-white border border-gray-100 cursor-pointer transition-all duration-200 shadow-sm text-center overflow-hidden"
                 >
+                  <FormalCardBorder />
                   <div className={`w-12 h-12 ${action.bg} rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm`}>
                     <action.icon size={20} className={action.iconColor} />
                   </div>
@@ -1256,11 +1293,12 @@ const ExpertDashboard = () => {
                               style={{
                                 width: 'calc(50% - 8px)',
                                 minWidth: '260px',
-                                minHeight: '420px',
+                                minHeight: '440px',
                                 flexShrink: 0
                               }}
-                              className="bg-white rounded-2xl border-2 border-[#0eb59a]/15 p-5 hover:border-[#0eb59a]/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative overflow-hidden"
+                              className="bg-white rounded-2xl border-2 border-[#0eb59a]/15 p-6 hover:border-[#0eb59a]/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative overflow-hidden text-center flex flex-col items-center justify-between"
                             >
+                              <FormalCardBorder />
                               {/* Top accent on hover */}
                               <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#134e40] to-[#0eb59a] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
 
@@ -1272,7 +1310,7 @@ const ExpertDashboard = () => {
                                 </div>
                               )}
 
-                              {/* Urgency pill — top left, standalone row */}
+                              {/* Urgency pill centered */}
                               <div className="mb-3">
                                 <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
                                   opp.urgency === 'Immediate'
@@ -1285,20 +1323,20 @@ const ExpertDashboard = () => {
                                 </span>
                               </div>
 
-                              {/* Logo + match badge row */}
-                              <div className="flex items-center justify-between mb-4">
+                              {/* Centered Logo Section */}
+                              <div className="flex flex-col items-center gap-2 mb-3">
                                 <motion.div
                                   whileHover={{ rotate: 5 }}
-                                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${opp.logoColor} flex items-center justify-center shadow-md shrink-0`}
+                                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${opp.logoColor} flex items-center justify-center shadow-md shrink-0`}
                                 >
-                                  <span className="text-white font-black text-base">
+                                  <span className="text-white font-black text-lg">
                                     {opp.logo}
                                   </span>
                                 </motion.div>
-                                <div className="flex flex-col items-end gap-1.5">
+                                <div className="flex flex-col items-center gap-1 mt-1">
                                   <span
                                     style={{ background: 'linear-gradient(135deg, #134e40, #0eb59a)' }}
-                                    className="text-[10px] font-black text-white px-2.5 py-1 rounded-full shadow-sm"
+                                    className="text-[10px] font-black text-white px-2.5 py-1 rounded-full shadow-sm uppercase tracking-wide"
                                   >
                                     {opp.match}% Match
                                   </span>
@@ -1308,35 +1346,35 @@ const ExpertDashboard = () => {
                                 </div>
                               </div>
 
-                              {/* Title — fixed height to prevent wrapping variance */}
-                              <h3 className="font-black text-gray-900 text-sm leading-tight mb-1.5 group-hover:text-[#134e40] transition-colors line-clamp-2">
+                              {/* Title centered with slightly larger font */}
+                              <h3 className="font-black text-gray-900 text-sm sm:text-base leading-tight mb-1 text-center group-hover:text-[#134e40] transition-colors line-clamp-2">
                                 {opp.title}
                               </h3>
-                              <p className="text-[11px] text-gray-600 font-bold mb-0.5">
+                              <p className="text-xs text-gray-650 font-bold mb-0.5 text-center">
                                 {opp.company}
                               </p>
-                              <p className="text-[11px] text-gray-400 mb-4">
+                              <p className="text-[10px] text-gray-400 mb-4 text-center">
                                 {opp.companySize}
                               </p>
 
-                              {/* Info rows */}
-                              <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2 text-xs font-black text-[#134e40]">
-                                  <DollarSign size={11} className="text-[#0eb59a] shrink-0" />
-                                  {opp.budget}
+                              {/* Info rows inside centered box */}
+                              <div className="flex flex-col mb-4 rounded-xl border border-gray-100 bg-white overflow-hidden w-full text-center shadow-sm">
+                                <div className="text-xs px-3 py-2 flex flex-col items-center">
+                                  <span className="text-[9px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Budget</span>
+                                  <span className="font-black text-[#134e40] text-xs flex items-center gap-1"><DollarSign size={10} className="text-[#0eb59a]" /> {opp.budget}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                  <Clock size={11} className="shrink-0" />
-                                  {opp.commitment}
+                                <div className="text-xs px-3 py-2 flex flex-col items-center border-t border-gray-50">
+                                  <span className="text-[9px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Commitment</span>
+                                  <span className="font-black text-gray-700 text-xs flex items-center gap-1"><Clock size={10} /> {opp.commitment}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                  <MapPin size={11} className="shrink-0" />
-                                  {opp.location}
+                                <div className="text-xs px-3 py-2 flex flex-col items-center border-t border-gray-50">
+                                  <span className="text-[9px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Location</span>
+                                  <span className="font-black text-gray-700 text-xs flex items-center gap-1"><MapPin size={10} /> {opp.location}</span>
                                 </div>
                               </div>
 
-                              {/* Skill tags */}
-                              <div className="flex flex-wrap gap-1.5 mb-3">
+                              {/* Centered skill tags */}
+                              <div className="flex flex-wrap gap-1.5 justify-center mb-3">
                                 {opp.skills.slice(0, 2).map((skill, i) => (
                                   <span key={i}
                                     className="text-[9px] font-black px-2 py-0.5 rounded-lg bg-[#f0fdf4] text-[#134e40] border border-[#0eb59a]/20"
@@ -1351,13 +1389,13 @@ const ExpertDashboard = () => {
                                 )}
                               </div>
 
-                              {/* Social proof */}
-                              <p className="text-[11px] text-gray-400 font-medium mb-4">
+                              {/* Centered social proof */}
+                              <p className="text-[11px] text-gray-400 font-medium mb-4 text-center">
                                 {opp.applicants} applied · Posted {opp.postedDays}d ago
                               </p>
 
-                              {/* CTAs */}
-                              <div className="flex items-center gap-2">
+                              {/* Centered CTAs */}
+                              <div className="flex items-center gap-2 w-full mt-auto">
                                 <motion.button
                                   whileHover={{ scale: 1.03 }}
                                   whileTap={{ scale: 0.97 }}
@@ -1429,7 +1467,8 @@ const ExpertDashboard = () => {
 
               {/* RIGHT 40% — Pending Actions with more room */}
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full relative">
+                  <FormalCardBorder />
                   {/* Header (with count badge + wobble animation) */}
                   <div className="p-5 border-b border-gray-50 bg-gradient-to-b from-amber-50/40 to-white flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1527,7 +1566,8 @@ const ExpertDashboard = () => {
               <div className="lg:col-span-3 flex flex-col gap-6">
                 
                 {/* Active Engagements */}
-                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm relative">
+                  <FormalCardBorder />
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
                       <Activity size={16} className="text-[#0eb59a]" /> Active Engagements
@@ -1670,6 +1710,7 @@ const ExpertDashboard = () => {
                   transition={{ delay: 0.45 }}
                   className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm relative overflow-hidden"
                 >
+                  <FormalCardBorder />
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#134e40] via-[#0eb59a] to-transparent" />
                   
                   <div className="flex items-center justify-between mb-5">
@@ -1724,8 +1765,9 @@ const ExpertDashboard = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.42 }}
-                  className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm"
+                  className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm relative"
                 >
+                  <FormalCardBorder />
                   <h2 className="text-base font-black text-gray-900 flex items-center gap-2 mb-6">
                     <Award size={16} className="text-[#0eb59a]" /> Profile Strength
                   </h2>

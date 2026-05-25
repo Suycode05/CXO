@@ -9,8 +9,9 @@ import {
   Star, DollarSign, Target, ArrowUpRight,
   ShieldCheck, Menu, AlertCircle, MapPin, X,
   BarChart2, MessageSquare, CheckCircle,
-  Zap, TrendingUp, Eye, Heart, Grid
+  Zap, TrendingUp, Eye, Heart, Grid, Calendar
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 // ── ANIMATED COUNTER ──
 const AnimatedCounter = ({ value }) => {
@@ -57,7 +58,7 @@ const ExpertCard = ({ expert }) => {
       onClick={() => navigate(`/experts/${expert.id}`)}
       style={{
         width: 'calc(25% - 9px)',
-        minWidth: '200px',
+        minWidth: '220px',
         flexShrink: 0,
         boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
       }}
@@ -67,77 +68,79 @@ const ExpertCard = ({ expert }) => {
         borderColor: 'rgba(14,181,154,0.45)'
       }}
       whileTap={{ scale: 0.97 }}
-      className="bg-[#FAFBF9] rounded-2xl border-2 border-gray-200 p-4 group cursor-pointer relative overflow-hidden text-left"
+      className="bg-[#FAFBF9] rounded-2xl border-2 border-gray-200 p-5 group cursor-pointer relative overflow-hidden text-center flex flex-col items-center"
     >
       {/* Top accent bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#134e40] to-[#0eb59a] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
 
-      <div className="flex items-start justify-between mb-2 text-left">
-        <div className="relative shrink-0 w-11 h-11">
-          {expert.avatar ? (
-            <img
-              src={expert.avatar}
-              alt={expert.name}
-              className="w-11 h-11 object-cover shadow-md shrink-0"
-              style={{ borderRadius: '11px 0px 11px 11px' }}
-            />
-          ) : (
-            <div className={`w-11 h-11 rounded-full text-white text-sm font-bold flex items-center justify-center shadow-md shrink-0 ${expert.color}`}>
-              {expert.initials}
-            </div>
-          )}
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full" />
-        </div>
-        <div className="flex flex-col items-end gap-1 text-left">
-          <span
-            style={{ background: 'linear-gradient(135deg, #134e40, #0eb59a)' }}
-            className="text-left text-xs px-2 py-0.5 text-white rounded-full font-semibold"
-          >
-            {expert.match}% MATCH
-          </span>
-          <div className="flex items-center gap-0.5 text-left">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={10}
-                fill={i < Math.floor(parseFloat(expert.rating)) ? '#F59E0B' : 'none'}
-                className={i < Math.floor(parseFloat(expert.rating)) ? 'text-amber-400' : 'text-gray-200'}
-              />
-            ))}
-            <span className="text-left text-xs font-black text-gray-600 ml-1">{expert.rating}</span>
+      {/* Avatar Section */}
+      <div className="relative shrink-0 w-16 h-16 mx-auto mb-3">
+        {expert.avatar ? (
+          <img
+            src={expert.avatar}
+            alt={expert.name}
+            className="w-16 h-16 object-cover shadow-md shrink-0"
+            style={{ borderRadius: '16px' }}
+          />
+        ) : (
+          <div className={`w-16 h-16 rounded-2xl text-white text-base font-bold flex items-center justify-center shadow-md shrink-0 ${expert.color}`}>
+            {expert.initials}
           </div>
-        </div>
-      </div>
-      <h3 className="text-left text-sm font-semibold text-gray-800 mt-1">{expert.name}</h3>
-      <p className="text-left text-xs text-gray-500 mb-3">{expert.role}</p>
-
-      {/* Info rows container */}
-      <div className="flex flex-col mb-3 rounded-xl border border-gray-100 bg-white overflow-hidden text-left">
-        <div className="text-xs px-2.5 py-1.5 flex justify-between text-left">
-          <span className="text-left text-gray-400 font-semibold">Rate</span>
-          <span className="text-left font-bold text-[#134e40]">{expert.rate}</span>
-        </div>
-        <div className="text-xs px-2.5 py-1.5 flex justify-between border-t border-gray-100 text-left">
-          <span className="text-left text-gray-400 font-semibold">Availability</span>
-          <span className="text-left font-bold text-gray-600">{expert.availability}</span>
-        </div>
-        <div className="text-xs px-2.5 py-1.5 flex justify-between border-t border-gray-100 text-left">
-          <span className="text-left text-gray-400 font-semibold">Location</span>
-          <span className="text-left font-bold text-gray-600 truncate max-w-[80px]">{expert.location}</span>
-        </div>
+        )}
+        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full animate-pulse" />
       </div>
 
-      <div className="flex items-center gap-1.5 text-left" onClick={(e) => e.stopPropagation()}>
+      {/* Match and Star badges in center */}
+      <div className="flex flex-col items-center gap-1 mb-2 text-center">
+        <span
+          style={{ background: 'linear-gradient(135deg, #134e40, #0eb59a)' }}
+          className="text-[10px] px-2.5 py-0.5 text-white rounded-full font-black tracking-wider uppercase"
+        >
+          {expert.match}% MATCH
+        </span>
+        <div className="flex items-center gap-1 mt-0.5">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={11}
+              fill={i < Math.floor(parseFloat(expert.rating)) ? '#F59E0B' : 'none'}
+              className={i < Math.floor(parseFloat(expert.rating)) ? 'text-amber-400' : 'text-gray-200'}
+            />
+          ))}
+          <span className="text-xs font-black text-gray-700 ml-1">{expert.rating}</span>
+        </div>
+      </div>
+
+      <h3 className="text-base font-black text-gray-800 mt-1 mb-0.5 leading-snug">{expert.name}</h3>
+      <p className="text-xs text-gray-400 font-bold mb-4">{expert.role}</p>
+
+      {/* Center-aligned Info rows */}
+      <div className="flex flex-col mb-4 rounded-xl border border-gray-100 bg-white overflow-hidden w-full text-center shadow-sm">
+        <div className="text-xs px-3 py-2 flex flex-col items-center">
+          <span className="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Rate</span>
+          <span className="font-black text-[#134e40] text-xs">{expert.rate}</span>
+        </div>
+        <div className="text-xs px-3 py-2 flex flex-col items-center border-t border-gray-50">
+          <span className="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Availability</span>
+          <span className="font-black text-gray-700 text-xs">{expert.availability}</span>
+        </div>
+        <div className="text-xs px-3 py-2 flex flex-col items-center border-t border-gray-50">
+          <span className="text-[10px] text-gray-400 font-black tracking-wider uppercase mb-0.5">Location</span>
+          <span className="font-black text-gray-700 text-xs truncate max-w-full">{expert.location}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 w-full mt-auto" onClick={(e) => e.stopPropagation()}>
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate(`/experts/${expert.id}`)}
-          className="flex-1 text-left text-xs py-1.5 px-3 bg-[#134e40] text-white rounded-lg hover:bg-[#0eb59a] transition-colors duration-200 font-bold"
+          className="flex-1 text-center justify-center text-xs py-2 bg-[#134e40] text-white rounded-xl hover:bg-[#0eb59a] transition-colors duration-200 font-black cursor-pointer"
         >
           View Profile
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          className="flex-1 text-left text-xs py-1.5 px-3 border border-gray-200 text-gray-600 rounded-lg hover:border-[#0eb59a] hover:text-[#0eb59a] transition-colors duration-200 font-bold"
+          className="flex-1 text-center justify-center text-xs py-2 border border-gray-300 text-gray-650 rounded-xl hover:border-[#0eb59a] hover:text-[#0eb59a] hover:bg-teal-50/20 transition-colors duration-200 font-black cursor-pointer"
         >
           Invite
         </motion.button>
@@ -148,13 +151,15 @@ const ExpertCard = ({ expert }) => {
             e.stopPropagation();
             setIsHearted(!isHearted);
           }}
-          className={`w-7 h-7 flex-shrink-0 border rounded-lg flex items-center justify-center transition-colors duration-200 ${
+          className={`w-8 h-8 flex-shrink-0 border rounded-xl flex items-center justify-center transition-colors duration-200 cursor-pointer ${
             isHearted
               ? 'bg-rose-50 border-rose-200 text-rose-500'
-              : 'bg-white border-gray-200 text-gray-400 hover:border-rose-400 hover:text-rose-400'
+              : 'bg-white border-gray-300 text-gray-400 hover:border-rose-400 hover:text-rose-400'
           }`}
         >
-          <Heart size={14} fill={isHearted ? 'currentColor' : 'none'} />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isHearted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
         </motion.button>
       </div>
     </motion.div>
@@ -298,7 +303,8 @@ const CompanyDashboard = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const notifications = [
@@ -394,10 +400,10 @@ const CompanyDashboard = () => {
   };
 
   const kpiCards = [
-    { title: 'Active Engagements', value: activeEngagementsCount.toString(), trend: '+1 this month', icon: Activity, iconBg: 'bg-teal-50', iconColor: 'text-[#0eb59a]', border: 'border-l-[#0eb59a]', numColor: 'text-[#0eb59a]', path: '/engagements' },
-    { title: 'Experts Shortlisted', value: '12', trend: '4 new this week', icon: Users, iconBg: 'bg-blue-50', iconColor: 'text-blue-500', border: 'border-l-purple-400', numColor: 'text-purple-500', path: '/experts?filter=shortlisted' },
-    { title: 'Total Spend', value: '₹4.2L', trend: 'On budget', icon: DollarSign, iconBg: 'bg-purple-50', iconColor: 'text-purple-500', border: 'border-l-blue-400', numColor: 'text-blue-500', path: '/payments' },
-    { title: 'Milestones Due', value: '2', trend: 'Next in 3 days', icon: Target, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', border: 'border-l-amber-400', numColor: 'text-amber-500', path: '/engagements?filter=milestones' },
+    { title: 'Active Engagements', value: activeEngagementsCount.toString(), trend: '+1 this month', icon: Activity, iconBg: 'bg-teal-50', iconColor: 'text-[#0eb59a]', border: 'border-t-4 border-t-[#0eb59a]', numColor: 'text-[#0eb59a]', path: '/engagements' },
+    { title: 'Experts Shortlisted', value: '12', trend: '4 new this week', icon: Users, iconBg: 'bg-blue-50', iconColor: 'text-blue-500', border: 'border-t-4 border-t-purple-400', numColor: 'text-purple-500', path: '/experts?filter=shortlisted' },
+    { title: 'Total Spend', value: '₹4.2L', trend: 'On budget', icon: DollarSign, iconBg: 'bg-purple-50', iconColor: 'text-purple-500', border: 'border-t-4 border-t-blue-400', numColor: 'text-blue-500', path: '/payments' },
+    { title: 'Milestones Due', value: '2', trend: 'Next in 3 days', icon: Target, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', border: 'border-t-4 border-t-amber-400', numColor: 'text-amber-500', path: '/engagements?filter=milestones' },
   ];
 
   const activeEngagements = [
@@ -408,7 +414,7 @@ const CompanyDashboard = () => {
 
   const pendingActions = [
     { title: 'Approve Milestone: Phase 1', project: 'Marketing Strategy', type: 'APPROVAL', time: '2 hours ago', urgent: true, typeColor: 'bg-amber-100 text-amber-700 border-amber-200', dotColor: 'bg-amber-500', path: '/engagements/1?tab=milestones' },
-    { title: 'Review New Candidates', project: 'Interim CFO', type: 'REVIEW', time: '5 hours ago', urgent: false, typeColor: 'bg-blue-100 text-blue-700 border-blue-200', dotColor: 'bg-blue-500', path: '/requirements/1?tab=candidates' },
+    { title: 'Review New Candidates', project: 'Interim CFO', type: 'REVIEW', time: '5 hours ago', urgent: false, typeColor: 'bg-blue-100 text-blue-700 border-blue-200', dotColor: 'bg-blue-500', path: '/requirements' },
     { title: 'Sign Contract', project: 'Tech Advisory', type: 'ACTION', time: '1 day ago', urgent: false, typeColor: 'bg-rose-100 text-rose-700 border-rose-200', dotColor: 'bg-purple-500', path: '/contracts/1' },
     { title: 'Escrow Pending', project: 'Project Scoping', type: 'ESCROW', time: '1 day ago', urgent: true, typeColor: 'bg-rose-100 text-rose-700 border-rose-200', dotColor: 'bg-rose-500', path: '/payments' },
     { title: 'Meeting Reminder', project: '1-on-1 with David', type: 'MEETING', time: 'Today 3PM', urgent: false, typeColor: 'bg-teal-100 text-teal-700 border-teal-200', dotColor: 'bg-teal-500', path: '/engagements/1' },
@@ -440,7 +446,12 @@ const CompanyDashboard = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -487,6 +498,69 @@ const CompanyDashboard = () => {
             </motion.button>
           ))}
         </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
+            <motion.button
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ x: 2, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+            >
+              <LogOut size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                Sign Out
+              </motion.span>
+            </motion.button>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
@@ -808,18 +882,13 @@ const CompanyDashboard = () => {
                         </motion.div>
                       ))}
                     </div>
-                    <span className="text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Verified Company · Premium</span>
                   </div>
 
                   <h1 className="text-left text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
-                    Good morning,{' '}
+                    Welcome,{' '}
                     <span className="text-left text-transparent bg-clip-text bg-gradient-to-r from-[#134e40] to-[#0eb59a]">
                       {loadingProfile ? '...' : (companyProfile?.company_name || 'Acme Corp.')}
-                    </span>{' '}
-                    <motion.span animate={{ rotate: [0, 20, -10, 20, 0] }}
-                      transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatDelay: 4 }} className="inline-block">
-                      👋
-                    </motion.span>
+                    </span>
                   </h1>
 
                   <p className="text-left text-slate-500 text-sm mt-2 font-medium">
@@ -852,17 +921,16 @@ const CompanyDashboard = () => {
               {kpiCards.map((kpi, idx) => (
                 <motion.div key={idx} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 * idx }}>
                   <div onClick={() => navigate(kpi.path)}
-                    className={`bg-white rounded-xl p-4 sm:p-5 border border-gray-100 border-l-4 ${kpi.border} cursor-pointer relative group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 text-left`}>
-                    <div className="flex items-start justify-between mb-3 text-left">
-                      <span className="text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight pr-2">{kpi.title}</span>
-                      <div className={`w-8 h-8 ${kpi.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                        <kpi.icon size={15} className={kpi.iconColor} />
-                      </div>
+                    className={`bg-white rounded-xl p-5 border border-gray-100 ${kpi.border} cursor-pointer relative group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 flex flex-col items-center justify-center text-center min-h-[160px]`}>
+                    <FormalCardBorder />
+                    <div className={`w-10 h-10 ${kpi.iconBg} rounded-full flex items-center justify-center shrink-0 mb-3 group-hover:scale-110 transition-transform duration-200 shadow-sm mx-auto`}>
+                      <kpi.icon size={18} className={kpi.iconColor} />
                     </div>
-                    <p className={`text-left text-2xl sm:text-3xl font-black mb-2 tracking-tight ${kpi.numColor}`}>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight mb-1">{kpi.title}</span>
+                    <p className={`text-2xl sm:text-3xl font-black mb-2 tracking-tight ${kpi.numColor}`}>
                       {mounted ? <AnimatedCounter value={kpi.value} /> : kpi.value}
                     </p>
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-lg text-left">
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
                       <ArrowUpRight size={9} /> {kpi.trend}
                     </div>
                   </div>
@@ -874,7 +942,8 @@ const CompanyDashboard = () => {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="grid grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
               {quickActions.map((action, idx) => (
                 <div key={idx} onClick={() => navigate(action.path)}
-                  className="relative group flex flex-col items-center gap-2 p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-gray-200 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-center">
+                  className="relative group flex flex-col items-center gap-2 p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-gray-200 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 text-center overflow-hidden">
+                  <FormalCardBorder />
                   <div className={`w-9 h-9 sm:w-11 sm:h-11 ${action.bg} rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                     <action.icon size={17} className={action.iconColor} />
                   </div>
@@ -895,8 +964,9 @@ const CompanyDashboard = () => {
               transition={{ duration: 0.4, delay: 0.4 }}
               onMouseEnter={() => setIsCarouselHovered(true)}
               onMouseLeave={() => setIsCarouselHovered(false)}
-              className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 shadow-sm text-left"
+              className="bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 shadow-sm text-left relative"
             >
+              <FormalCardBorder />
               <div className="flex items-center justify-between mb-6 text-left">
                 <div className="text-left">
                   <h2 className="text-left text-sm sm:text-base font-black text-gray-900 flex items-center gap-2">
@@ -1000,7 +1070,8 @@ const CompanyDashboard = () => {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.5 }} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
               {/* Active Engagements — left 2/3 */}
-              <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 shadow-sm text-left">
+              <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 p-5 sm:p-6 shadow-sm text-left relative">
+                <FormalCardBorder />
                 <div className="flex items-center justify-between mb-5 text-left">
                   <h2 className="text-left text-sm sm:text-base font-black text-gray-900 flex items-center gap-2">
                     <Activity size={16} className="text-[#0eb59a]" /> Active Engagements
@@ -1087,7 +1158,8 @@ const CompanyDashboard = () => {
 
               {/* Pending Actions — right 1/3 */}
               <div className="flex flex-col text-left">
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col max-h-[520px] text-left">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col max-h-[520px] text-left relative">
+                  <FormalCardBorder />
                   <div className="p-4 sm:p-5 border-b border-gray-50 bg-gradient-to-b from-amber-50/40 to-white text-left">
                     <div className="flex items-center justify-between text-left">
                       <h2 className="text-left text-sm font-black text-gray-900 flex items-center gap-2">

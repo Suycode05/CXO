@@ -12,6 +12,7 @@ import {
   ShieldCheck, Menu, BarChart2, MessageSquare, Grid,
   Heart, Check
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 const Requirements = () => {
   const navigate = useNavigate();
@@ -173,6 +174,38 @@ const Requirements = () => {
     };
   }, [navigate]);
 
+  const handleDeleteRequirement = async (id) => {
+    const isDemo = localStorage.getItem('demo_company') === 'true';
+    if (isDemo) {
+      setRequirements(prev => prev.filter(req => req.id !== id));
+      if (selectedRequirement?.id === id) {
+        setSelectedRequirement(null);
+      }
+      setShowDeleteModal(null);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('company_requirements')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting requirement:", error);
+      } else {
+        setRequirements(prev => prev.filter(req => req.id !== id));
+        if (selectedRequirement?.id === id) {
+          setSelectedRequirement(null);
+        }
+      }
+    } catch (err) {
+      console.error("Error executing delete:", err);
+    } finally {
+      setShowDeleteModal(null);
+    }
+  };
+
   // ── HELPERS ──
   const filters = ['All', 'Active', 'Draft', 'Shortlisting', 'Closed'];
 
@@ -304,7 +337,8 @@ const Requirements = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   return (
@@ -324,7 +358,12 @@ const Requirements = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -367,13 +406,76 @@ const Requirements = () => {
                   width: isSidebarOpen ? 'auto' : 0 
                 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold"
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
               >
                 {item.label}
               </motion.span>
             </motion.button>
           ))}
         </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
+            <motion.button
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ x: 2, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+            >
+              <LogOut size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                Sign Out
+              </motion.span>
+            </motion.button>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT AREA ── */}
@@ -608,6 +710,7 @@ const Requirements = () => {
                           ${isDimmed ? 'opacity-75' : ''}
                         `}
                       >
+                        <FormalCardBorder />
                         {/* Status accent bar — thick, left edge */}
                         <div className={`absolute left-0 top-0 bottom-0 ${cardStyle.barWidth} ${cardStyle.bar} rounded-l-2xl`} />
 
@@ -715,29 +818,43 @@ const Requirements = () => {
                               )}
 
                               {/* CTA — bottom right */}
-                              <motion.button
-                                whileHover={{ scale: 1.04 }}
-                                whileTap={{ scale: 0.96 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  req.status === 'Draft'
-                                    ? navigate(`/requirements/create?draft=${req.id}`)
-                                    : setSelectedRequirement(isSelected ? null : req);
-                                }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 shadow-sm
-                                  ${req.status === 'Draft'
-                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
-                                    : req.status === 'Closed'
-                                    ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-default'
-                                    : 'bg-[#134e40] text-white hover:bg-[#0eb59a] shadow-[#134e40]/20'
+                              <div className="flex items-center gap-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDeleteModal(req.id);
+                                  }}
+                                  className="p-2 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 hover:bg-rose-100 transition-all flex items-center justify-center cursor-pointer z-20"
+                                  title="Delete Requirement"
+                                >
+                                  <Trash2 size={13} />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.04 }}
+                                  whileTap={{ scale: 0.96 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    req.status === 'Draft'
+                                      ? navigate(`/requirements/create?draft=${req.id}`)
+                                      : setSelectedRequirement(isSelected ? null : req);
+                                  }}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 shadow-sm cursor-pointer
+                                    ${req.status === 'Draft'
+                                      ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
+                                      : req.status === 'Closed'
+                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-default'
+                                      : 'bg-[#134e40] text-white hover:bg-[#0eb59a] shadow-[#134e40]/20'
+                                    }
+                                  `}
+                                >
+                                  {req.status === 'Draft'
+                                    ? <><Edit size={12} /> Continue Draft</>
+                                    : <><Eye size={12} /> View Details</>
                                   }
-                                `}
-                              >
-                                {req.status === 'Draft'
-                                  ? <><Edit size={12} /> Continue Draft</>
-                                  : <><Eye size={12} /> View Details</>
-                                }
-                              </motion.button>
+                                </motion.button>
+                              </div>
 
                             </div>
                           </div>
@@ -945,6 +1062,15 @@ const Requirements = () => {
                   {/* Drawer Footer */}
                   <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3 shrink-0">
                     <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowDeleteModal(selectedRequirement.id)}
+                      className="px-3.5 py-2.5 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl hover:bg-rose-100 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+                      title="Delete Requirement"
+                    >
+                      <Trash2 size={13} />
+                    </motion.button>
+                    <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => navigate(`/requirements/${selectedRequirement.id}`)}
@@ -1004,7 +1130,7 @@ const Requirements = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowDeleteModal(null)}
+                  onClick={() => handleDeleteRequirement(showDeleteModal)}
                   className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-2xl transition-all shadow-lg"
                 >
                   Delete

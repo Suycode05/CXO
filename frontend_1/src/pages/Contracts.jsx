@@ -9,8 +9,9 @@ import {
   Users, Briefcase, Lock, Unlock, MoreVertical,
   PenLine, RefreshCw, ExternalLink, Copy, Zap,
   Building, ChevronDown, LayoutDashboard, Bell, Settings,
-  ShieldCheck, ChevronLeft, BarChart2, CreditCard
+  ShieldCheck, ChevronLeft, BarChart2, CreditCard, LogOut, MessageSquare
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 const Contracts = () => {
   const navigate = useNavigate();
@@ -77,8 +78,8 @@ const Contracts = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: ShieldCheck, label: 'PMO Services', path: '/pmo' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const notifications = [
@@ -247,6 +248,15 @@ const Contracts = () => {
     },
   ];
 
+  useEffect(() => {
+    if (contractId) {
+      const match = contracts.find(c => c.id === parseInt(contractId));
+      if (match) {
+        setSelectedContract(match);
+      }
+    }
+  }, [contractId]);
+
   // ── CONTRACT PREVIEW CONTENT ──
   const contractPreview = `
 ENGAGEMENT AGREEMENT
@@ -351,7 +361,12 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
           <motion.button
             animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -376,16 +391,23 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
                 whileHover={{ x: 2, transition: { duration: 0.15 } }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${item.label === 'My Requirements'
-                    ? 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+                  isActive
+                    ? 'bg-[#134e40] text-white shadow-md'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-                  }`}
+                }`}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                  />
+                )}
                 <item.icon size={17} className="shrink-0" />
                 <motion.span
                   animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
                   transition={{ duration: 0.2 }}
-                  className="overflow-hidden whitespace-nowrap text-sm font-bold"
+                  className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
                 >
                   {item.label}
                 </motion.span>
@@ -393,6 +415,69 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
             );
           })}
         </nav>
+
+        {/* Separated Settings option pinned to the bottom */}
+        <div className="p-3 border-t border-gray-50 space-y-1">
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/settings')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+              window.location.pathname === '/settings'
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+            }`}
+          >
+            {window.location.pathname === '/settings' && (
+              <motion.div
+                layoutId="activeNav"
+                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+              />
+            )}
+            <Settings size={17} className="shrink-0" />
+            <motion.span
+              animate={{ 
+                opacity: isSidebarOpen ? 1 : 0, 
+                width: isSidebarOpen ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Settings
+            </motion.span>
+          </motion.button>
+
+          {window.location.pathname === '/settings' && (
+            <motion.button
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ x: 2, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={async () => {
+                const isDemo = localStorage.getItem('demo_company') === 'true';
+                if (isDemo) {
+                  localStorage.removeItem('demo_company');
+                } else {
+                  await supabase.auth.signOut();
+                }
+                navigate('/signin?role=company');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+            >
+              <LogOut size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                Sign Out
+              </motion.span>
+            </motion.button>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
@@ -521,15 +606,16 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
                 transition={{ delay: idx * 0.07 }}
                 whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.08)', transition: { duration: 0.2 } }}
                 style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-                className={`bg-white rounded-2xl p-4 border-l-4 ${stat.border} cursor-default`}
+                className={`bg-white rounded-2xl p-4 border-l-4 ${stat.border} cursor-default relative overflow-hidden`}
               >
-                <div className="flex items-center gap-2 mb-2">
+                <FormalCardBorder />
+                <div className="flex items-center gap-2 mb-2 relative z-10">
                   <div className={`w-6 h-6 ${stat.iconBg} rounded-md flex items-center justify-center shrink-0`}>
                     <stat.icon size={12} className={stat.iconColor} />
                   </div>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-left">{stat.label}</span>
                 </div>
-                <p className={`text-[26px] font-black ${stat.numColor} leading-none text-left`}>{stat.value}</p>
+                <p className={`text-[26px] font-black ${stat.numColor} leading-none text-left relative z-10`}>{stat.value}</p>
               </motion.div>
             ))}
           </div>
@@ -653,10 +739,11 @@ IN WITNESS WHEREOF, the parties have executed this Agreement as of the date firs
                       transition={{ duration: 0.25, delay: idx * 0.04 }}
                       whileHover={{ y: -3, boxShadow: '0 16px 40px rgba(0,0,0,0.07)', transition: { duration: 0.2 } }}
                       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-                      className={`bg-white rounded-2xl overflow-hidden group cursor-default ${contract.status === 'Expired' ? 'opacity-60' : ''
+                      className={`bg-white rounded-2xl overflow-hidden group cursor-default relative ${contract.status === 'Expired' ? 'opacity-60' : ''
                         }`}
                     >
-                      <div className="p-5">
+                      <FormalCardBorder />
+                      <div className="p-5 relative z-10">
                         <div className="flex items-start gap-4">
 
                           {/* Document icon */}

@@ -18,6 +18,9 @@ import Contracts from './pages/Contracts';
 import Payments from './pages/Payments';
 import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
+import Messages from './pages/Messages';
+import Meetings from './pages/Meetings';
+import Pmo from './pages/Pmo';
 import ExpertOpportunities from './pages/ExpertOpportunities';
 import ExpertEngagements from './pages/ExpertEngagements';
 import ExpertEarnings from './pages/ExpertEarnings';
@@ -77,7 +80,7 @@ const AppContent = () => {
   }, [navigate]);
 
   const showNavbar = location.pathname === '/' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service';
-  const isDashboard = location.pathname === '/company-dashboard' || location.pathname === '/expert-dashboard' || location.pathname === '/requirements' || location.pathname === '/requirements/create' || location.pathname === '/experts' || location.pathname.startsWith('/experts/') || location.pathname.startsWith('/engagements') || location.pathname === '/settings' || location.pathname.startsWith('/expert-opportunities') || location.pathname.startsWith('/expert-engagements') || location.pathname === '/expert-earnings' || location.pathname === '/expert-profile' || location.pathname === '/analytics';
+  const isDashboard = location.pathname === '/company-dashboard' || location.pathname === '/expert-dashboard' || location.pathname === '/requirements' || location.pathname === '/requirements/create' || location.pathname === '/experts' || location.pathname.startsWith('/experts/') || location.pathname.startsWith('/engagements') || location.pathname === '/settings' || location.pathname.startsWith('/expert-opportunities') || location.pathname.startsWith('/expert-engagements') || location.pathname === '/expert-earnings' || location.pathname === '/expert-profile' || location.pathname === '/analytics' || location.pathname === '/pmo' || location.pathname === '/messages' || location.pathname === '/meetings';
 
 
   return (
@@ -103,6 +106,9 @@ const AppContent = () => {
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/pmo" element={<Pmo />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/meetings" element={<Meetings />} />
 
 
             <Route path="/expert-dashboard" element={<ExpertDashboard />} />

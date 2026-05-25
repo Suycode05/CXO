@@ -11,8 +11,9 @@ import {
   Building, FileText, ChevronDown, Users,
   IndianRupee, Wallet, BarChart2, Target,
   LayoutDashboard, Bell, Settings, ShieldCheck,
-  ChevronLeft, ArrowLeft
+  ChevronLeft, ArrowLeft, LogOut, MessageSquare
 } from 'lucide-react';
+import FormalCardBorder from '../components/FormalCardBorder';
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -81,7 +82,8 @@ const Payments = () => {
     { icon: Users, label: 'Experts', path: '/experts' },
     { icon: CreditCard, label: 'Payments', path: '/payments', active: true },
     { icon: BarChart2, label: 'Analytics', path: '/analytics' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: MessageSquare, label: 'Messages', path: '/messages' },
+    { icon: Calendar, label: 'Scheduled Meetings', path: '/meetings' },
   ];
 
   const notifications = [
@@ -341,10 +343,10 @@ const Payments = () => {
 
   const quickAmounts = ['₹1,0,000', '₹2,50,000', '₹5,0,000', '₹10,00,000'];
   const paymentMethods = [
-    { id: 'upi', label: 'UPI', icon: '🔵', desc: 'Instant transfer' },
-    { id: 'neft', label: 'NEFT / IMPS', icon: '🏦', desc: '2-4 hours' },
-    { id: 'netsbanking', label: 'Net Banking', icon: '💻', desc: 'Instant' },
-    { id: 'card', label: 'Credit / Debit Card', icon: '💳', desc: '+ 2% fee' },
+    { id: 'upi', label: 'UPI', icon: Zap, desc: 'Instant transfer' },
+    { id: 'neft', label: 'NEFT / IMPS', icon: Building, desc: '2-4 hours' },
+    { id: 'netsbanking', label: 'Net Banking', icon: ShieldCheck, desc: 'Instant' },
+    { id: 'card', label: 'Credit / Debit Card', icon: CreditCard, desc: '+ 2% fee' },
   ];
 
   // ── HELPERS ──
@@ -410,7 +412,12 @@ const Payments = () => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden shrink-0 flex items-center"
           >
-            <img src="/LOGO_FINAL.png" alt="CXO Connect" className="w-[160px] h-auto object-contain shrink-0" />
+            <img 
+              src="/LOGO_FINAL.png" 
+              alt="CXO Connect" 
+              className="w-[160px] h-auto object-contain shrink-0 cursor-pointer" 
+              onClick={() => window.location.reload()}
+            />
           </motion.div>
         <motion.button
           animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
@@ -427,38 +434,104 @@ const Payments = () => {
         {isSidebarOpen && (
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Main Menu</p>
         )}
-        {navItems.map((item) => (
+        {navItems.map((item) => {
+          const isActive = item.active || window.location.pathname === item.path || (item.path === '/experts' && window.location.pathname.startsWith('/experts'));
+          return (
+            <motion.button
+              key={item.path}
+              whileHover={{ x: 2, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+                isActive
+                  ? 'bg-[#134e40] text-white shadow-md'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeNav"
+                  className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+                />
+              )}
+              <item.icon size={17} className="shrink-0" />
+              <motion.span
+                animate={{ 
+                  opacity: isSidebarOpen ? 1 : 0, 
+                  width: isSidebarOpen ? 'auto' : 0 
+                }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+              >
+                {item.label}
+              </motion.span>
+            </motion.button>
+          );
+        })}
+      </nav>
+
+      {/* Separated Settings option pinned to the bottom */}
+      <div className="p-3 border-t border-gray-50 space-y-1">
+        <motion.button
+          whileHover={{ x: 2, transition: { duration: 0.15 } }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/settings')}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
+            window.location.pathname === '/settings'
+              ? 'bg-[#134e40] text-white shadow-md'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+          }`}
+        >
+          {window.location.pathname === '/settings' && (
+            <motion.div
+              layoutId="activeNav"
+              className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
+            />
+          )}
+          <Settings size={17} className="shrink-0" />
+          <motion.span
+            animate={{ 
+              opacity: isSidebarOpen ? 1 : 0, 
+              width: isSidebarOpen ? 'auto' : 0 
+            }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+          >
+            Settings
+          </motion.span>
+        </motion.button>
+
+        {window.location.pathname === '/settings' && (
           <motion.button
-            key={item.path}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
             whileHover={{ x: 2, transition: { duration: 0.15 } }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate(item.path)}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
-              item.active
-                ? 'bg-[#134e40] text-white shadow-md'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-            }`}
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_company') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_company');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=company');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
           >
-            {item.active && (
-              <motion.div
-                layoutId="activeNav"
-                className="absolute left-0 top-1 bottom-1 w-0.5 bg-[#0eb59a] rounded-r-full"
-              />
-            )}
-            <item.icon size={17} className="shrink-0" />
+            <LogOut size={17} className="shrink-0" />
             <motion.span
               animate={{ 
                 opacity: isSidebarOpen ? 1 : 0, 
                 width: isSidebarOpen ? 'auto' : 0 
               }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden whitespace-nowrap text-sm font-bold"
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
-              {item.label}
+              Sign Out
             </motion.span>
           </motion.button>
-        ))}
-      </nav>
+        )}
+      </div>
     </motion.aside>
 
     {/* ── MAIN CONTENT ── */}
@@ -583,10 +656,10 @@ const Payments = () => {
         {/* ── KPI CARDS ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: 'Escrow Balance', value: escrowSummary.totalBalance, icon: Wallet, iconBg: 'bg-teal-50', iconColor: 'text-[#0eb59a]', numColor: 'text-[#134e40]', border: 'border-l-[#0eb59a]', sub: 'Secured funds' },
-            { label: 'Total Released', value: escrowSummary.totalSpent, icon: Unlock, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500', numColor: 'text-emerald-700', border: 'border-l-emerald-400', sub: '4 milestones paid' },
-            { label: 'Pending Release', value: escrowSummary.pendingRelease, icon: Clock, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', numColor: 'text-amber-700', border: 'border-l-amber-400', sub: 'Awaiting approval' },
-            { label: 'Total Committed', value: escrowSummary.totalEngagementValue, icon: Target, iconBg: 'bg-purple-50', iconColor: 'text-purple-500', numColor: 'text-purple-700', border: 'border-l-purple-400', sub: '2 engagements' },
+            { label: 'Escrow Balance', value: escrowSummary.totalBalance, icon: Wallet, iconBg: 'bg-teal-50', iconColor: 'text-[#0eb59a]', numColor: 'text-[#134e40]', border: 'border-t-4 border-t-[#0eb59a]', sub: 'Secured funds' },
+            { label: 'Total Released', value: escrowSummary.totalSpent, icon: Unlock, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500', numColor: 'text-emerald-700', border: 'border-t-4 border-t-emerald-400', sub: '4 milestones paid' },
+            { label: 'Pending Release', value: escrowSummary.pendingRelease, icon: Clock, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', numColor: 'text-amber-700', border: 'border-t-4 border-t-amber-400', sub: 'Awaiting approval' },
+            { label: 'Total Committed', value: escrowSummary.totalEngagementValue, icon: Target, iconBg: 'bg-purple-50', iconColor: 'text-purple-500', numColor: 'text-purple-700', border: 'border-t-4 border-t-purple-400', sub: '2 engagements' },
           ].map((card, idx) => (
             <motion.div
               key={idx}
@@ -595,16 +668,17 @@ const Payments = () => {
               transition={{ delay: idx * 0.07 }}
               whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.08)', transition: { duration: 0.2 } }}
               style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-              className={`bg-white rounded-2xl p-4 border-l-4 ${card.border} cursor-default`}
+              className={`bg-white rounded-2xl p-5 ${card.border} cursor-default relative overflow-hidden flex flex-col items-center text-center justify-center`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-6 h-6 ${card.iconBg} rounded-md flex items-center justify-center shrink-0`}>
-                  <card.icon size={12} className={card.iconColor} />
+              <FormalCardBorder />
+              <div className="flex flex-col items-center gap-1.5 mb-2 relative z-10">
+                <div className={`w-8 h-8 ${card.iconBg} rounded-lg flex items-center justify-center shrink-0`}>
+                  <card.icon size={14} className={card.iconColor} />
                 </div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-left">{card.label}</span>
+                <span className="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-widest text-center">{card.label}</span>
               </div>
-              <p className={`text-[22px] font-black ${card.numColor} tracking-tight leading-none text-left mb-1`}>{card.value}</p>
-              <p className="text-[10px] text-gray-400 font-medium text-left">{card.sub}</p>
+              <p className={`text-[24px] sm:text-[28px] font-black ${card.numColor} tracking-tight leading-none text-center mb-1.5 relative z-10`}>{card.value}</p>
+              <p className="text-xs text-gray-400 font-bold text-center relative z-10">{card.sub}</p>
             </motion.div>
           ))}
         </div>
@@ -645,7 +719,8 @@ const Payments = () => {
               <div className="lg:col-span-2 space-y-5">
 
                 {/* Active Escrow Accounts */}
-                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                  <FormalCardBorder />
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 text-left">
                       <Lock size={14} className="text-[#0eb59a]" /> Active Escrow Accounts
@@ -735,11 +810,12 @@ const Payments = () => {
                 </div>
 
                 {/* Monthly Spend Chart */}
-                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                  <FormalCardBorder />
                   <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 mb-5 text-left">
                     <BarChart2 size={14} className="text-[#0eb59a]" /> Monthly Spend
                   </h3>
-                  <div className="flex items-end gap-3 h-36">
+                   <div className="flex items-end gap-3 h-36 mt-6 mb-4">
                     {[
                       { month: 'Feb', amount: 350, label: '₹3.5L', active: true },
                       { month: 'Mar', amount: 200, label: '₹2L', active: true },
@@ -750,17 +826,12 @@ const Payments = () => {
                     ].map((bar, idx) => (
                       <motion.div
                         key={bar.month}
-                        className="flex-1 flex flex-col items-center gap-2 group cursor-default"
-                        whileHover={{ scale: 1.05 }}
+                        className="flex-1 flex flex-col items-center gap-2 group cursor-pointer"
+                        whileHover={{ y: -5, scale: 1.05 }}
                       >
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 + idx * 0.1 }}
-                          className={`text-[10px] font-bold ${bar.active ? 'text-[#134e40]' : 'text-gray-300'}`}
-                        >
+                        <span className={`text-[10px] font-black opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1 ${bar.active ? 'text-[#134e40]' : 'text-gray-300'}`}>
                           {bar.label}
-                        </motion.span>
+                        </span>
                         <div className="w-full flex flex-col justify-end" style={{ height: '90px' }}>
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
@@ -768,14 +839,14 @@ const Payments = () => {
                             transition={{ duration: 0.8, delay: idx * 0.12, ease: 'easeOut' }}
                             whileHover={{ filter: 'brightness(1.1)' }}
                             style={{ borderRadius: '8px 8px 4px 4px' }}
-                            className={`w-full ${
+                            className={`w-full shadow-sm group-hover:shadow-md transition-shadow ${
                               bar.active
                                 ? 'bg-gradient-to-t from-[#134e40] to-[#0eb59a]'
                                 : 'bg-gray-100'
-                            } transition-all duration-200`}
+                            }`}
                           />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-400">{bar.month}</span>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-gray-900 transition-colors mt-1">{bar.month}</span>
                       </motion.div>
                     ))}
                   </div>
@@ -786,7 +857,8 @@ const Payments = () => {
               <div className="space-y-4">
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                  <FormalCardBorder />
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 text-left">
                       <Clock size={13} className="text-[#0eb59a]" /> Recent Activity
@@ -861,7 +933,8 @@ const Payments = () => {
                 </motion.div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                <div className="bg-white rounded-2xl p-5 relative overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                  <FormalCardBorder />
                   <h3 className="font-black text-[#1C3627] text-sm mb-3 text-left">Quick Actions</h3>
                   <div className="space-y-1">
                     {[
@@ -931,7 +1004,8 @@ const Payments = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+              <div className="bg-white rounded-2xl overflow-hidden relative" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                <FormalCardBorder />
                 <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
                   <h3 className="font-black text-[#1C3627] text-sm text-left">
                     All Transactions
@@ -1027,8 +1101,9 @@ const Payments = () => {
                   transition={{ delay: idx * 0.07 }}
                   whileHover={{ y: -3, boxShadow: '0 12px 30px rgba(0,0,0,0.07)', transition: { duration: 0.2 } }}
                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
-                  className="bg-white rounded-2xl p-5 flex items-center gap-4 group cursor-default"
+                  className="bg-white rounded-2xl p-5 flex items-center gap-4 group cursor-default relative overflow-hidden"
                 >
+                  <FormalCardBorder />
                   <motion.div
                     whileHover={{ rotate: -5, scale: 1.05 }}
                     className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0"
@@ -1157,9 +1232,10 @@ const Payments = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                    className="bg-white rounded-2xl p-5"
+                    className="bg-white rounded-2xl p-5 relative overflow-hidden"
                     style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
                   >
+                    <FormalCardBorder />
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <img src={account.expertAvatar} className="w-11 h-11 rounded-xl object-cover shadow-sm" />
@@ -1326,7 +1402,7 @@ const Payments = () => {
                                 : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                             }`}
                           >
-                            <span className="text-lg shrink-0">{method.icon}</span>
+                            <method.icon size={18} className={`shrink-0 ${paymentMethod === method.id ? 'text-[#0eb59a]' : 'text-gray-400'}`} />
                             <div className="flex-1 text-left">
                               <p className={`text-sm font-black text-left ${paymentMethod === method.id ? 'text-[#134e40]' : 'text-gray-700'}`}>
                                 {method.label}

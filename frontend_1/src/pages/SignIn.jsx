@@ -140,7 +140,7 @@ const SignIn = () => {
 				});
 				if (authError) throw authError;
 
-				setMessage(`✅ OTP sent to ${targetEmail}`);
+				setMessage(`OTP sent to ${targetEmail}`);
 				setShowOtp(true);
 			} else {
 				// 👨‍💼 EXPERT LOGIN
@@ -161,7 +161,7 @@ const SignIn = () => {
 
 					if (error) throw error;
 
-					setMessage(`✅ OTP sent to ${cleanIdentifier}`);
+					setMessage(`OTP sent to ${cleanIdentifier}`);
 					setShowOtp(true);
 				} else {
 					const baseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -177,7 +177,7 @@ const SignIn = () => {
 					const data = await response.json();
 					if (!response.ok) throw new Error(data.error || "Failed to send magic link");
 
-					setMessage(`✅ Magic link sent to ${cleanIdentifier}`);
+					setMessage(`Magic link sent to ${cleanIdentifier}`);
 				}
 			}
 		} catch (err) {
