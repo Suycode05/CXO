@@ -162,7 +162,7 @@ const ExpertDashboard = () => {
     { name: 'Dashboard',      icon: LayoutDashboard, path: '/expert-dashboard'    },
     { name: 'Opportunities',  icon: Briefcase,       path: '/expert-opportunities', badge: '3' },
     { name: 'My Engagements', icon: Activity,        path: '/expert-engagements'  },
-    { name: 'Contracts',      icon: FileText,        path: '/expert-contracts'    },
+    { name: 'Contracts',      icon: FileText,        path: '/contracts'    },
     { name: 'Earnings',       icon: DollarSign,      path: '/expert-earnings'     },
     { name: 'Profile',        icon: UserCircle,      path: '/expert-profile'      },
     { name: 'Analytics',      icon: BarChart2,       path: '/expert-analytics'    },
