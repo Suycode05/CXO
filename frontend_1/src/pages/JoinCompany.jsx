@@ -216,7 +216,7 @@ const JoinCompany = () => {
 					linkedin: data.linkedin, additional_links: additionalLinks
 				}]);
 				dbError = response.error;
-			} catch (e) { dbError = null; }
+			} catch (e) { dbError = e; }
 			if (dbError) throw dbError;
 			setShowSuccessModal(true);
 		} catch (error) {
