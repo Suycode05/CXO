@@ -215,6 +215,7 @@ const Analytics = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [showPastExperts, setShowPastExperts] = useState(false);
 
   const tabs = [
     'Overview', 'Engagements', 'Experts',
@@ -292,6 +293,12 @@ const Analytics = () => {
     { name: 'Priya Patel', role: 'VP Engineering', avatar: 'https://i.pravatar.cc/150?u=priya', rating: 4.8, spend: '₹0', status: 'Shortlisted', match: 92 },
     { name: 'Marcus Johnson', role: 'Interim COO', avatar: 'https://i.pravatar.cc/150?u=marcus', rating: 4.7, spend: '₹4.5L', status: 'Completed', match: 88 },
   ];
+
+  // ── EXPERT TAB DERIVED VALUES (computed at component scope to avoid IIFE in JSX) ──
+  const activeExperts = expertsList.filter(e => e.status === 'Active');
+  const pastExperts = expertsList.filter(e => e.status !== 'Active');
+  const expertsAvgMatch = Math.round(expertsList.reduce((sum, e) => sum + e.match, 0) / expertsList.length);
+  const expertsAvgRating = (expertsList.reduce((sum, e) => sum + e.rating, 0) / expertsList.length).toFixed(1);
 
   const requirementsList = [
     { title: 'Interim CFO — Series B', type: 'Interim', status: 'Active', experts: 12, shortlisted: 3, engaged: 1, posted: 'Feb 1, 2025', budget: '₹3L/mo' },
@@ -826,22 +833,21 @@ const Analytics = () => {
                   ].map((item, idx) => (
                     <motion.div key={idx}
                       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.08 }}
-                      whileHover={{ y: -5, boxShadow: `0 16px 40px ${item.glow}20`, transition: { duration: 0.2 } }}
+              whileHover={{ y: -5, boxShadow: `0 16px 40px ${item.glow}20`, transition: { duration: 0.2 } }}
                       className={`bg-white rounded-2xl p-5 border-l-4 ${item.border} cursor-default group relative overflow-hidden`}
                       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                       <FormalCardBorder />
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         style={{ background: `radial-gradient(circle at 0% 100%, ${item.glow}10 0%, transparent 60%)` }} />
-                      <div className="relative z-10">
+                      <div className="relative z-10 flex flex-col items-center text-center">
                         <div className={`w-9 h-9 ${item.bg} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200`}>
                           <item.icon size={17} className={item.color} />
                         </div>
-                        <p className="text-2xl font-black text-[#1C3627] mb-0.5 text-left">
+                        <p className="text-2xl font-black text-[#1C3627] mb-0.5 text-center">
                           <AnimatedNumber value={item.value} suffix={item.suffix} />
                         </p>
-                        <p className="text-xs font-bold text-gray-500 mb-1 text-left">{item.label}</p>
-                        <p className="text-[10px] text-gray-400 text-left">{item.sub}</p>
+                        <p className="text-xs font-bold text-gray-500 mb-1 text-center">{item.label}</p>
+                        <p className="text-[10px] text-gray-400 text-center">{item.sub}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -909,42 +915,115 @@ const Analytics = () => {
             {activeTab === 'Experts' && (
               <motion.div key="experts" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="space-y-4">
                 <KpiStrip items={[
-                  { label: 'Total Experts', value: '5', border: 'border-l-[#0eb59a]', numColor: 'text-[#134e40]', large: true },
-                  { label: 'Currently Active', value: '2', border: 'border-l-blue-400', numColor: 'text-blue-700', large: true },
-                  { label: 'Avg Match Score', value: '93%', border: 'border-l-amber-400', numColor: 'text-amber-700', large: true },
-                  { label: 'Avg Rating', value: '4.9★', border: 'border-l-emerald-400', numColor: 'text-emerald-700', large: true },
+                  { label: 'Total Experts', value: String(expertsList.length), border: 'border-l-[#0eb59a]', numColor: 'text-[#134e40]', large: true },
+                  { label: 'Currently Active', value: String(activeExperts.length), border: 'border-l-blue-400', numColor: 'text-blue-700', large: true },
+                  { label: 'Avg Match Score', value: `${expertsAvgMatch}%`, border: 'border-l-amber-400', numColor: 'text-amber-700', large: true },
+                  { label: 'Avg Rating', value: `${expertsAvgRating}★`, border: 'border-l-emerald-400', numColor: 'text-emerald-700', large: true },
                 ]} />
+
+                {/* ── Active Experts ── */}
                 <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                   <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-                    <h3 className="font-black text-[#1C3627] text-sm text-left">All Experts</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-[#1C3627] text-sm">Active Experts</h3>
+                      <span className="text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full">{activeExperts.length} active</span>
+                    </div>
                     <motion.button whileHover={{ scale: 1.04, x: 2 }} whileTap={{ scale: 0.96 }} onClick={() => navigate('/experts')} className="text-xs font-bold text-[#0eb59a] hover:text-[#134e40] transition-colors flex items-center gap-1">View All <ChevronRight size={12} /></motion.button>
                   </div>
-                  {expertsList.map((expert, idx) => (
-                    <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.07 }} whileHover={{ backgroundColor: '#FAFBF9', x: 3, transition: { duration: 0.15 } }} className={`flex items-center gap-4 px-5 py-4 cursor-default group ${idx < expertsList.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                      <div className="relative shrink-0">
-                        <img src={expert.avatar} className="w-11 h-11 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow" alt={expert.name} />
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${expert.status === 'Active' ? 'bg-emerald-500' : expert.status === 'Shortlisted' ? 'bg-amber-400' : 'bg-gray-300'}`} />
+                  {activeExperts.length === 0
+                    ? <p className="text-xs text-gray-400 text-center py-8">No active experts right now.</p>
+                    : activeExperts.map((expert, idx) => (
+                      <div key={expert.name} className={`flex items-center gap-4 px-5 py-4 cursor-default group hover:bg-[#FAFBF9] transition-colors ${idx < activeExperts.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                        <div className="relative shrink-0">
+                          <img src={expert.avatar} className="w-11 h-11 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow" alt={expert.name} />
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${expert.status === 'Active' ? 'bg-emerald-500' : expert.status === 'Shortlisted' ? 'bg-amber-400' : 'bg-gray-300'}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-black text-[#1C3627] text-sm">{expert.name}</p>
+                          <p className="text-xs text-gray-400 font-medium">{expert.role}</p>
+                        </div>
+                        <div className="hidden md:flex items-center gap-5">
+                          {[{ label: 'Rating', value: `${expert.rating}★`, color: 'text-amber-600' }, { label: 'Spend', value: expert.spend, color: 'text-[#1C3627]' }, { label: 'Match', value: `${expert.match}%`, color: 'text-[#134e40]' }].map((item, i) => (
+                            <div key={i} className="text-center min-w-[48px]">
+                              <p className={`text-sm font-black ${item.color} text-center`}>{item.value}</p>
+                              <p className="text-[9px] text-gray-400 uppercase tracking-wide text-center">{item.label}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <StatusBadge status={expert.status} />
+                        <motion.button whileHover={{ scale: 1.15, backgroundColor: '#F0FDF4' }} whileTap={{ scale: 0.9 }} onClick={() => navigate(`/experts/${idx + 1}`)} className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-[#0eb59a] transition-all shrink-0"><Eye size={14} /></motion.button>
                       </div>
-                      <div className="flex-1 min-w-0 text-left"><p className="font-black text-[#1C3627] text-sm text-left">{expert.name}</p><p className="text-xs text-gray-400 font-medium text-left">{expert.role}</p></div>
-                      <div className="hidden md:flex items-center gap-5">
-                        {[{ label: 'Rating', value: `${expert.rating}★`, color: 'text-amber-600' },{ label: 'Spend', value: expert.spend, color: 'text-[#1C3627]' },{ label: 'Match', value: `${expert.match}%`, color: 'text-[#134e40]' }].map((item, i) => (
-                          <div key={i} className="text-center min-w-[48px]"><p className={`text-sm font-black ${item.color} text-center`}>{item.value}</p><p className="text-[9px] text-gray-400 uppercase tracking-wide text-center">{item.label}</p></div>
-                        ))}
-                      </div>
-                      <StatusBadge status={expert.status} />
-                      <motion.button whileHover={{ scale: 1.15, backgroundColor: '#F0FDF4' }} whileTap={{ scale: 0.9 }} onClick={() => navigate(`/experts/${idx + 1}`)} className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-[#0eb59a] transition-all shrink-0"><Eye size={14} /></motion.button>
-                    </motion.div>
-                  ))}
+                    ))
+                  }
                 </div>
+
+                {/* ── Past / Inactive Experts (collapsible) ── */}
+                {pastExperts.length > 0 && (
+                  <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <motion.button
+                      onClick={() => setShowPastExperts(p => !p)}
+                      className="w-full px-5 py-4 flex items-center justify-between cursor-pointer bg-transparent border-0 text-left"
+                      whileHover={{ backgroundColor: '#FAFBF9' }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-black text-gray-500 text-sm">Past / Inactive Experts</h3>
+                        <span className="text-[10px] font-black bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-full">{pastExperts.length}</span>
+                      </div>
+                      <motion.div animate={{ rotate: showPastExperts ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                        <ChevronDown size={15} className="text-gray-400" />
+                      </motion.div>
+                    </motion.button>
+                    <AnimatePresence initial={false}>
+                      {showPastExperts && (
+                        <motion.div
+                          key="past-experts"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-gray-50">
+                            {pastExperts.map((expert, idx) => (
+                              <div key={expert.name} className={`flex items-center gap-4 px-5 py-4 cursor-default group hover:bg-[#FAFBF9] transition-colors ${idx < pastExperts.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                                <div className="relative shrink-0">
+                                  <img src={expert.avatar} className="w-11 h-11 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow" alt={expert.name} />
+                                  <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${expert.status === 'Active' ? 'bg-emerald-500' : expert.status === 'Shortlisted' ? 'bg-amber-400' : 'bg-gray-300'}`} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-black text-[#1C3627] text-sm">{expert.name}</p>
+                                  <p className="text-xs text-gray-400 font-medium">{expert.role}</p>
+                                </div>
+                                <div className="hidden md:flex items-center gap-5">
+                                  {[{ label: 'Rating', value: `${expert.rating}★`, color: 'text-amber-600' }, { label: 'Spend', value: expert.spend, color: 'text-[#1C3627]' }, { label: 'Match', value: `${expert.match}%`, color: 'text-[#134e40]' }].map((item, i) => (
+                                    <div key={i} className="text-center min-w-[48px]">
+                                      <p className={`text-sm font-black ${item.color} text-center`}>{item.value}</p>
+                                      <p className="text-[9px] text-gray-400 uppercase tracking-wide text-center">{item.label}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <StatusBadge status={expert.status} />
+                                <motion.button whileHover={{ scale: 1.15, backgroundColor: '#F0FDF4' }} whileTap={{ scale: 0.9 }} onClick={() => navigate(`/experts/${idx + 1}`)} className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-[#0eb59a] transition-all shrink-0"><Eye size={14} /></motion.button>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                {/* ── AI Match Score Distribution (active experts only) ── */}
                 <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                   <SectionHeading icon={Target} label="AI Match Score Distribution" />
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    {expertsList.map((expert, idx) => (
+                    {activeExperts.map((expert, idx) => (
                       <motion.div key={idx} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
                         whileHover={{ scale: 1.06, boxShadow: '0 12px 30px rgba(14,181,154,0.15)', transition: { duration: 0.2 } }}
                         className="bg-[#FAFBF9] rounded-2xl p-4 border border-gray-100 text-center cursor-default">
                         <div className="relative w-16 h-16 mx-auto mb-3">
-                          <DonutChart segments={[{ value: expert.match, color: '#0eb59a' },{ value: 100 - expert.match, color: '#F1F5F2' }]} size={64} strokeWidth={9} />
+                          <DonutChart segments={[{ value: expert.match, color: '#0eb59a' }, { value: 100 - expert.match, color: '#F1F5F2' }]} size={64} strokeWidth={9} />
                           <div className="absolute inset-0 flex items-center justify-center"><span className="text-[12px] font-black text-[#134e40] text-center">{expert.match}%</span></div>
                         </div>
                         <p className="text-[12px] font-black text-[#1C3627] text-center">{expert.name.split(' ')[0]}</p>
@@ -1153,7 +1232,7 @@ const Analytics = () => {
                           className="p-4 bg-gray-50 border border-gray-100 rounded-xl text-left transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
                           <div className="flex items-center justify-between mb-3.5">
                             <span className="text-xs font-black text-[#1C3627] text-left">{item.title}</span>
-                            <span className="text-xs font-black text-[#0eb59a] bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">{item.roi}% ROI</span>
+                            <span className="text-xs font-black text-[#0eb59a] bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">{Math.round(((item.valueNum - item.costNum) / item.costNum) * 100)}% ROI</span>
                           </div>
                           <div className="space-y-3">
                             <div>
@@ -1177,26 +1256,64 @@ const Analytics = () => {
                     </div>
                   </Card>
 
-                  <Card className="p-5">
+                  <Card className="p-5 flex flex-col">
                     <SectionHeading icon={PieChart} label="Business Impact Vectors" />
-                    <div className="flex flex-col items-center gap-4 mt-5">
-                      <div className="relative">
-                        <DonutChart segments={roiBreakdown} size={110} strokeWidth={14} />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center">
-                            <p className="text-[13px] font-black text-[#134e40]">₹75.0L</p>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">Delivered</p>
+                    <div className="flex flex-col gap-5 mt-5 flex-1">
+
+                      {/* Donut + legend */}
+                      <div className="flex items-center gap-5">
+                        <div className="relative shrink-0">
+                          <DonutChart segments={roiBreakdown} size={100} strokeWidth={13} />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center">
+                              <p className="text-[12px] font-black text-[#134e40]">₹75L</p>
+                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wide">Delivered</p>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex-1 space-y-2">
+                          {roiBreakdown.map((seg, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
+                              <span className="text-[10px] text-gray-500 font-semibold flex-1 text-left">{seg.label}</span>
+                              <span className="text-[11px] font-black text-[#1C3627]">{seg.value}%</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="w-full space-y-2.5">
-                        {roiBreakdown.map((seg, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-left">
-                            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
-                            <span className="text-[11px] text-gray-600 font-semibold flex-1 text-left">{seg.label}</span>
-                            <span className="text-[11px] font-black text-[#1C3627] text-right">{seg.value}%</span>
-                          </div>
-                        ))}
+
+                      {/* Progress bars for each segment */}
+                      <div className="space-y-3">
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-1.5">Value breakdown</p>
+                        {roiBreakdown.map((seg, idx) => {
+                          const amount = ((seg.value / 100) * 75).toFixed(1);
+                          return (
+                            <div key={idx}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[10px] font-bold text-gray-600">{seg.label}</span>
+                                <span className="text-[10px] font-black" style={{ color: seg.color }}>₹{amount}L</span>
+                              </div>
+                              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${seg.value}%` }}
+                                  transition={{ duration: 0.9, delay: 0.3 + idx * 0.1, ease: 'easeOut' }}
+                                  style={{ height: '100%', backgroundColor: seg.color, borderRadius: '999px' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Net value insight */}
+                      <div className="mt-auto p-3.5 bg-teal-50 border border-teal-100 rounded-xl relative overflow-hidden">
+                        <FormalCardBorder />
+                        <div className="relative z-10">
+                          <p className="text-[9px] font-black text-teal-600 uppercase tracking-widest mb-1">Net Value Created</p>
+                          <p className="text-xl font-black text-[#134e40]">₹56.0L</p>
+                          <p className="text-[9px] text-teal-700 font-semibold mt-0.5">After ₹19L acquisition cost · <span className="font-black">295% blended ROI</span></p>
+                        </div>
                       </div>
                     </div>
                   </Card>

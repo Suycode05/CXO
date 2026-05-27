@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, FileText, Users, CreditCard, BarChart2,
   ShieldCheck, MessageSquare, Calendar, ChevronRight, ChevronLeft,
-  Bell, LogOut, Search, Send, Video, Clock, Smile, Paperclip,
+  Bell, LogOut, Search, Send, Clock, Smile, Paperclip,
   CheckCheck, Shield, ChevronDown, Award, Sparkles, X, File, Download,
-  CheckCircle, ShieldAlert, ArrowLeft, Settings, UserCircle, Briefcase, Activity, IndianRupee, Phone, Info
+  CheckCircle, ShieldAlert, ArrowLeft, Settings, UserCircle, Briefcase, Activity, IndianRupee, Info
 } from 'lucide-react';
 import FormalCardBorder from '../components/FormalCardBorder';
 
@@ -34,10 +34,27 @@ const Messages = () => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
 
   // File Upload State
   const [attachedFile, setAttachedFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Emoji list organized by categories
+  const EMOJI_LIST = [
+    '😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘',
+    '😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥',
+    '😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔',
+    '😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨',
+    '😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','🥴','😠','😡','🤬','😷',
+    '🤒','🤕','🤢','🤮','🤧','😇','🥳','🥸','🤠','🥺','🤥','🤫','🤭','🧐','🤓',
+    '👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉',
+    '👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','🫶','👐','🤲','🤝',
+    '🙏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','💕','💞','💓','💗',
+    '💖','💝','💟','☮️','✨','🔥','💯','💢','💥','💫','💦','🎉','🎊','🎈','🏆',
+    '🚀','⭐','🌟','💎','🎯','🔑','💡','🎵','🎶','🌈','🌊','🌺','🌸','🌻','🌹',
+  ];
 
   // 2-Step Meeting Form State
   const [meetingStep, setMeetingStep] = useState(1);
@@ -54,6 +71,19 @@ const Messages = () => {
   useEffect(() => {
     setMeetingTime(`${meetingHour}:${meetingMinute} ${meetingPeriod}`);
   }, [meetingHour, meetingMinute, meetingPeriod]);
+
+  // Close emoji picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
 
   const messagesEndRef = useRef(null);
 
@@ -517,12 +547,6 @@ const Messages = () => {
 
             {/* Header Actions */}
             <div className="flex items-center gap-2">
-              <button type="button" className="p-2 text-gray-400 hover:text-[#134e40] hover:bg-slate-50 rounded-xl transition-colors bg-transparent border-0 cursor-pointer" title="Start Audio Call">
-                <Phone size={15} />
-              </button>
-              <button type="button" className="p-2 text-gray-400 hover:text-[#134e40] hover:bg-slate-50 rounded-xl transition-colors bg-transparent border-0 cursor-pointer" title="Start Video Call">
-                <Video size={15} />
-              </button>
               <button
                 type="button"
                 onClick={() => setShowInfoPanel(!showInfoPanel)}
@@ -673,9 +697,66 @@ const Messages = () => {
                 className="flex-1 bg-[#f4f7f5] border border-gray-100 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder:text-gray-400 font-semibold focus:outline-none focus:border-[#0eb59a]"
               />
 
-              <button type="button" className="p-2 text-gray-400 hover:text-[#134e40] transition-colors bg-transparent border-0">
-                <Smile size={17} />
-              </button>
+              {/* Emoji Picker Trigger */}
+              <div className="relative" ref={emojiPickerRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className={`p-2 rounded-xl transition-colors bg-transparent border-0 cursor-pointer ${
+                    showEmojiPicker ? 'text-[#134e40] bg-teal-50' : 'text-gray-400 hover:text-[#134e40]'
+                  }`}
+                  title="Emoji"
+                >
+                  <Smile size={17} />
+                </button>
+
+                <AnimatePresence>
+                  {showEmojiPicker && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                      className="absolute bottom-full right-0 mb-2 z-50"
+                      style={{
+                        width: '320px',
+                        background: '#fff',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 40px rgba(19,78,64,0.15), 0 2px 8px rgba(0,0,0,0.08)',
+                        border: '1px solid #e5e7eb',
+                        padding: '12px',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <Smile size={13} className="text-[#0eb59a]" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Emojis</span>
+                      </div>
+                      <div
+                        className="grid gap-1 overflow-y-auto"
+                        style={{
+                          gridTemplateColumns: 'repeat(10, 1fr)',
+                          maxHeight: '200px',
+                        }}
+                      >
+                        {EMOJI_LIST.map((emoji, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setInputMessage(prev => prev + emoji);
+                              setShowEmojiPicker(false);
+                            }}
+                            className="w-7 h-7 flex items-center justify-center text-base rounded-lg hover:bg-teal-50 transition-colors cursor-pointer border-0 bg-transparent leading-none"
+                            title={emoji}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <motion.button
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}

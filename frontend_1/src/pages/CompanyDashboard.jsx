@@ -309,10 +309,31 @@ const CompanyDashboard = () => {
   ];
 
   const notifications = [
-    { title: 'New Expert Match', desc: 'Sarah Jenkins matches your Interim CFO requirement at 98%', time: '5 min ago', unread: true, color: 'bg-teal-500' },
-    { title: 'Milestone Approved', desc: 'Phase 1 of Marketing Strategy has been completed', time: '1 hour ago', unread: true, color: 'bg-blue-500' },
-    { title: 'Contract Ready', desc: 'Tech Advisory contract is ready for your signature', time: '3 hours ago', unread: true, color: 'bg-purple-500' },
-    { title: 'Payment Released', desc: '₹85,000 released to David Chen for milestone completion', time: '1 day ago', unread: false, color: 'bg-emerald-500' },
+    {
+      title: 'Risk Alert: Budget Overrun',
+      desc: 'Your Series B Funding engagement with David Chen has exceeded the approved budget by 12%. Immediate review and reallocation is recommended to avoid project delays.',
+      time: '5 min ago', unread: true, color: 'bg-red-500', iconBg: 'bg-red-50', tag: 'Finance', action: 'Review Budget',
+    },
+    {
+      title: 'Milestone Overdue',
+      desc: 'The Investor Deck milestone under the Series B engagement is now 3 days past its scheduled delivery date. Expert David Chen has not submitted the deliverable yet.',
+      time: '2 hours ago', unread: true, color: 'bg-amber-500', iconBg: 'bg-amber-50', tag: 'Delivery', action: 'Send Reminder',
+    },
+    {
+      title: 'PMO Report Ready',
+      desc: 'Your Q1 2025 governance and compliance report is now available. It covers SLA adherence at 92%, expert performance scores, and escrow utilisation across all active engagements.',
+      time: '1 day ago', unread: true, color: 'bg-[#0eb59a]', iconBg: 'bg-teal-50', tag: 'PMO', action: 'View Report',
+    },
+    {
+      title: 'New Expert Match: 98% Score',
+      desc: 'Sarah Jenkins (Fractional CMO) has been AI-matched to your Go-to-Market Expansion requirement with a 98% compatibility score. She is available to start within 7 days.',
+      time: '2 days ago', unread: false, color: 'bg-blue-500', iconBg: 'bg-blue-50', tag: 'Expert Match', action: 'View Profile',
+    },
+    {
+      title: 'Payment Released',
+      desc: '₹2,00,000 has been successfully released from escrow to David Chen for completing the Financial Model Development milestone ahead of schedule. Tax invoice is attached.',
+      time: '3 days ago', unread: false, color: 'bg-purple-500', iconBg: 'bg-purple-50', tag: 'Payment', action: 'View Invoice',
+    },
   ];
 
   const MOCK_EXPERTS = [
@@ -777,7 +798,7 @@ const CompanyDashboard = () => {
                 transition={{ duration: 0.5, delay: 4, repeat: Infinity, repeatDelay: 10 }}
                 whileHover={{ scale: 1.08, backgroundColor: '#f0fdf4', borderColor: '#0eb59a' }}
                 whileTap={{ scale: 0.92 }}
-                onClick={() => { setShowNotifications(!showNotifications); setGridOpen(false); }}
+                onClick={() => { setShowNotifications(!showNotifications); setGridOpen(false); if (!showNotifications) setNotificationCount(0); }}
                 className={`relative w-9 h-9 flex items-center justify-center rounded-xl border transition-all duration-200 ${showNotifications ? 'bg-teal-50 border-[#0eb59a]' : 'bg-gray-50 border-gray-200'}`}
                 title="Notifications"
               >
@@ -802,38 +823,76 @@ const CompanyDashboard = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: '100%' }}
                       transition={{ duration: 0.3, type: "tween" }}
-                      className="fixed right-0 top-16 bottom-0 w-80 bg-white shadow-2xl border-l border-gray-100 z-50 overflow-hidden flex flex-col"
+                      className="fixed right-0 top-16 bottom-0 w-96 bg-white shadow-2xl border-l border-gray-100 z-50 overflow-hidden flex flex-col"
                     >
-                      <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between bg-gradient-to-r from-teal-50/50 to-white">
-                        <h3 className="font-black text-gray-900 text-sm text-left">Notifications</h3>
-                        <button onClick={() => setNotificationCount(0)} className="text-xs font-bold text-[#0eb59a] hover:text-[#134e40] transition-colors text-left">
-                          Mark all read
-                        </button>
+                      {/* Header */}
+                      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-teal-50/60 to-white shrink-0">
+                        <div>
+                          <h3 className="font-black text-gray-900 text-sm">Notifications</h3>
+                          <p className="text-[10px] text-gray-400 font-semibold mt-0.5">All caught up — {notifications.length} total</p>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.1, backgroundColor: '#f3f4f6' }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setShowNotifications(false)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors"
+                        >
+                          <X size={14} />
+                        </motion.button>
                       </div>
+
+                      {/* Notification list */}
                       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
                         {notifications.map((notif, idx) => (
                           <motion.div key={idx}
-                            initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className={`px-5 py-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors ${notif.unread ? 'bg-teal-50/20' : ''}`}
+                            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.06 }}
+                            className={`px-5 py-4 border-b border-gray-50 cursor-pointer transition-colors group ${
+                              notif.unread ? 'bg-gradient-to-r from-teal-50/30 to-transparent hover:from-teal-50/50' : 'hover:bg-gray-50/70'
+                            }`}
                           >
-                            <div className={`w-2 h-2 rounded-full ${notif.color} mt-1.5 shrink-0`} />
-                            <div className="flex-1 min-w-0 text-left">
-                              <p className="text-sm font-bold text-gray-900 leading-tight text-left">{notif.title}</p>
-                              <p className="text-xs text-gray-400 mt-0.5 leading-relaxed text-left">{notif.desc}</p>
-                              <p className="text-[10px] text-gray-300 font-semibold mt-1 text-left">{notif.time}</p>
+                            <div className="flex gap-3">
+                              {/* Icon */}
+                              <div className={`w-9 h-9 rounded-xl ${notif.iconBg} flex items-center justify-center shrink-0 mt-0.5`}>
+                                <div className={`w-2.5 h-2.5 rounded-full ${notif.color}`} />
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <p className="text-sm font-black text-gray-900 leading-tight">{notif.title}</p>
+                                  {notif.unread && (
+                                    <span className="w-2 h-2 rounded-full bg-[#0eb59a] shrink-0 mt-1.5" />
+                                  )}
+                                </div>
+                                <span className={`inline-block text-[9px] font-black px-1.5 py-0.5 rounded-md mb-1.5 ${
+                                  notif.color === 'bg-red-500' ? 'bg-red-50 text-red-600' :
+                                  notif.color === 'bg-amber-500' ? 'bg-amber-50 text-amber-600' :
+                                  notif.color === 'bg-[#0eb59a]' ? 'bg-teal-50 text-teal-700' :
+                                  notif.color === 'bg-blue-500' ? 'bg-blue-50 text-blue-600' :
+                                  'bg-purple-50 text-purple-600'
+                                }`}>{notif.tag}</span>
+                                <p className="text-[11px] text-gray-500 leading-relaxed">{notif.desc}</p>
+                                <div className="flex items-center justify-between mt-2.5">
+                                  <span className="text-[10px] text-gray-300 font-semibold">{notif.time}</span>
+                                  <motion.button
+                                    whileHover={{ scale: 1.04 }}
+                                    whileTap={{ scale: 0.96 }}
+                                    className={`text-[10px] font-black px-2.5 py-1 rounded-lg border transition-all ${
+                                      notif.color === 'bg-red-500' ? 'text-red-600 border-red-200 bg-red-50 hover:bg-red-500 hover:text-white' :
+                                      notif.color === 'bg-amber-500' ? 'text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-500 hover:text-white' :
+                                      notif.color === 'bg-[#0eb59a]' ? 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-[#0eb59a] hover:text-white' :
+                                      notif.color === 'bg-blue-500' ? 'text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-500 hover:text-white' :
+                                      'text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-500 hover:text-white'
+                                    }`}
+                                  >
+                                    {notif.action}
+                                  </motion.button>
+                                </div>
+                              </div>
                             </div>
-                            {notif.unread && <div className="w-1.5 h-1.5 rounded-full bg-[#0eb59a] mt-1.5 shrink-0" />}
                           </motion.div>
                         ))}
-                      </div>
-                      <div className="px-5 py-3 text-center border-t border-gray-50">
-                        <button
-                          onClick={() => { navigate('/notifications'); setShowNotifications(false); }}
-                          className="text-xs font-bold text-[#0eb59a] hover:text-[#134e40] transition-colors text-left"
-                        >
-                          View all notifications →
-                        </button>
                       </div>
                     </motion.div>
                   </>

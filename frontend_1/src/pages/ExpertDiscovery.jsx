@@ -102,7 +102,7 @@ const ExpertDiscovery = () => {
   const [experts, setExperts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [shortlisted, setShortlisted] = useState([]);
   const [compareTray, setCompareTray] = useState([]);
