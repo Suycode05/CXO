@@ -61,6 +61,7 @@ const Settings = () => {
     description: 'Acme Corp is a B2B SaaS company building the next generation of enterprise workflow automation tools.',
     headquarters: 'Mumbai, Maharashtra',
     founded: '2020',
+    companyAge: '1-3 Years',
     gst: '27AAACA0000A1ZS',
     adminEmail: 'admin@acmecorp.com',
     adminPhone: '+91 98765 43210',
@@ -109,7 +110,8 @@ const Settings = () => {
             website: data.website || prev.website,
             linkedIn: data.linkedin || prev.linkedIn,
             description: data.about || prev.description,
-            founded: data.company_age || prev.founded, // using company_age for founded or similar
+            founded: data.founded_year || prev.founded,
+            companyAge: data.company_age || prev.companyAge,
             gst: data.gstin || prev.gst,
             adminEmail: data.admin_email || prev.adminEmail,
             adminPhone: data.contact_number || prev.adminPhone,
@@ -257,6 +259,13 @@ const Settings = () => {
 
   const roleOptions = ['Founder', 'HR', 'Finance', 'Strategy', 'Operations'];
 
+  const companyAgeOptions = [
+    'Just Started (0-1 year)',
+    '1-3 Years',
+    '3-7 Years',
+    '7+ Years'
+  ];
+
   const roleColors = {
     Founder: 'text-purple-700 bg-purple-50 border-purple-200',
     HR: 'text-blue-700 bg-blue-50 border-blue-200',
@@ -371,7 +380,8 @@ const Settings = () => {
         website: profile.website,
         linkedin: profile.linkedIn,
         about: profile.description,
-        company_age: profile.founded,
+        company_age: profile.companyAge,
+        founded_year: profile.founded,
         gstin: profile.gst,
         contact_number: profile.adminPhone,
       };
@@ -824,11 +834,12 @@ const Settings = () => {
                     <h3 className="font-black text-[#1C3627] text-sm flex items-center gap-2 mb-4 text-left">
                       <Zap size={14} className="text-[#0eb59a]" /> Company Details
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                       {[
                         { label: 'Industry', key: 'industry', options: industryOptions },
                         { label: 'Company Size', key: 'size', options: sizeOptions },
                         { label: 'Funding Stage', key: 'fundingStage', options: fundingOptions },
+                        { label: 'Company Age', key: 'companyAge', options: companyAgeOptions },
                       ].map((field) => (
                         <div key={field.key}>
                           <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 text-left">

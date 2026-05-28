@@ -130,3 +130,155 @@ export const updateExpertProfile = async (req, res) => {
     res.status(500).json({ error: "Failed to update expert profile" });
   }
 };
+
+// ================= GET ACTIVE OPPORTUNITIES =================
+const getRelativeTimeString = (date) => {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 60) {
+    return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`;
+  } else if (diffHours < 24) {
+    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+  } else {
+    return diffDays === 1 ? "Yesterday" : `${diffDays} days ago`;
+  }
+};
+
+const mapDbOpportunity = (req, company, idx) => {
+  // Budget formatting: e.g. "₹2L - ₹3L/mo"
+  let budgetStr = "Negotiable";
+  if (req.budget_min && req.budget_max) {
+    budgetStr = `₹${(req.budget_min / 100000).toFixed(0)}L - ₹${(req.budget_max / 100000).toFixed(0)}L/mo`;
+  } else if (req.budget_min) {
+    budgetStr = `₹${(req.budget_min / 100000).toFixed(0)}L+/mo`;
+  }
+
+  // Logo initials
+  const initials = company.company_name
+    ? company.company_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "CO";
+
+  // Brand gradient colors
+  const logoColors = [
+    "from-teal-700 to-teal-500",
+    "from-[#134e40] to-[#0eb59a]",
+    "from-[#0eb59a] to-emerald-400",
+    "from-emerald-700 to-teal-500",
+    "from-[#134e40] to-slate-600",
+    "from-teal-800 to-[#134e40]"
+  ];
+  const logoColor = logoColors[idx % logoColors.length];
+
+  // Map type (e.g. fractional -> Fractional)
+  const type = req.engagement_type
+    ? req.engagement_type.charAt(0).toUpperCase() + req.engagement_type.slice(1)
+    : "Fractional";
+
+  // Urgency (e.g. immediate -> Immediate)
+  const urgency = req.urgency
+    ? req.urgency.charAt(0).toUpperCase() + req.urgency.slice(1)
+    : "Planned";
+
+  // Budget number for filtering
+  const budgetNum = req.budget_min || 0;
+
+  // Match score (mock or basic match)
+  const match = 80 + (idx % 19); // 80% to 98%
+
+  // Posted date formatting
+  const postedDate = req.created_at
+    ? getRelativeTimeString(new Date(req.created_at))
+    : "Recently";
+
+  return {
+    id: req.id,
+    title: req.role_title || "Untitled Opportunity",
+    company: company.company_name || "Confidential",
+    companySize: company.org_size ? `${company.org_size} employees` : "10-50 employees",
+    industry: company.industry || "Technology",
+    type: type,
+    match: match,
+    budget: budgetStr,
+    budgetNum: budgetNum,
+    commitment: req.commitment || "Flexible",
+    duration: req.duration || "Flexible",
+    location: req.location || "Remote",
+    postedDate: postedDate,
+    urgency: urgency,
+    skills: req.skills || [],
+    description: req.business_problem_text || "No description provided.",
+    logo: initials,
+    logoUrl: company.logo_url,
+    logoColor: logoColor,
+    status: req.status === 'Active' ? 'new' : 'normal',
+    applicants: 2 + (idx % 5), // mocked count
+    verified: company.status === 'Approved' || true,
+  };
+};
+
+export const getOpportunities = async (req, res) => {
+  try {
+    // 1. Fetch requirements with status = 'Active' (or non-draft)
+    const { data: requirements, error: reqError } = await supabaseAdmin
+      .from("company_requirements")
+      .select("*")
+      .eq("status", "Active");
+
+    if (reqError) {
+      console.error("Error fetching requirements:", reqError);
+      return res.status(500).json({ error: "Failed to fetch opportunities" });
+    }
+
+    // 2. Fetch registered companies
+    const { data: companies, error: compError } = await supabaseAdmin
+      .from("company_applications")
+      .select("*");
+
+    if (compError) {
+      console.error("Error fetching companies:", compError);
+      return res.status(500).json({ error: "Failed to fetch company details" });
+    }
+
+    // 3. Fetch authenticated user emails
+    const { data: { users }, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (authError) {
+      console.error("Error listing authenticated users:", authError);
+      return res.status(500).json({ error: "Failed to fetch authenticated status" });
+    }
+
+    const authenticatedEmails = new Set(users.map(u => u.email ? u.email.toLowerCase().trim() : "").filter(Boolean));
+
+    // 4. Map companies by email
+    const companyMap = new Map();
+    companies.forEach(c => {
+      if (c.admin_email) {
+        companyMap.set(c.admin_email.toLowerCase().trim(), c);
+      }
+    });
+
+    // 5. Combine and filter
+    const opportunities = [];
+    requirements.forEach((reqItem, idx) => {
+      const companyEmail = reqItem.company_email ? reqItem.company_email.toLowerCase().trim() : "";
+      const company = companyMap.get(companyEmail);
+
+      // Only include requirements where:
+      // - Company exists in company_applications
+      // - The company's admin email is in auth.users (signed up and authenticated)
+      if (company && authenticatedEmails.has(companyEmail)) {
+        opportunities.push(mapDbOpportunity(reqItem, company, idx));
+      }
+    });
+
+    res.json(opportunities);
+  } catch (err) {
+    console.error("getOpportunities error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
