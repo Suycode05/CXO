@@ -152,11 +152,10 @@ const ExpertCard = ({ expert }) => {
             e.stopPropagation();
             setIsHearted(!isHearted);
           }}
-          className={`w-8 h-8 flex-shrink-0 border rounded-xl flex items-center justify-center transition-colors duration-200 cursor-pointer ${
-            isHearted
-              ? 'bg-rose-50 border-rose-200 text-rose-500'
-              : 'bg-white border-gray-300 text-gray-400 hover:border-rose-400 hover:text-rose-400'
-          }`}
+          className={`w-8 h-8 flex-shrink-0 border rounded-xl flex items-center justify-center transition-colors duration-200 cursor-pointer ${isHearted
+            ? 'bg-rose-50 border-rose-200 text-rose-500'
+            : 'bg-white border-gray-300 text-gray-400 hover:border-rose-400 hover:text-rose-400'
+            }`}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill={isHearted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -441,7 +440,7 @@ const CompanyDashboard = () => {
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
         className="bg-white border-r border-gray-100 flex flex-col z-50 overflow-hidden shrink-0 shadow-sm fixed left-0 top-0 h-screen"
       >
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50 justify-between">
           <motion.div
             animate={{ width: isSidebarOpen ? 'auto' : 0, opacity: isSidebarOpen ? 1 : 0 }}
             transition={{ duration: 0.2 }}
@@ -450,7 +449,7 @@ const CompanyDashboard = () => {
             <div className="cursor-pointer" onClick={() => window.location.reload()}><Logo variant="dark" className="h-8" /></div>
           </motion.div>
           <motion.button
-            animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
+            animate={{ marginLeft: isSidebarOpen ? 'auto' : 'auto' }}
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#134e40] hover:bg-gray-100 transition-all shrink-0"
@@ -468,11 +467,10 @@ const CompanyDashboard = () => {
               whileHover={{ x: 2, transition: { duration: 0.15 } }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
-                item.active
-                  ? 'bg-[#134e40] text-white shadow-md'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-              }`}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${item.active
+                ? 'bg-[#134e40] text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+                }`}
             >
               {item.active && (
                 <motion.div
@@ -482,9 +480,9 @@ const CompanyDashboard = () => {
               )}
               <item.icon size={17} className="shrink-0" />
               <motion.span
-                animate={{ 
-                  opacity: isSidebarOpen ? 1 : 0, 
-                  width: isSidebarOpen ? 'auto' : 0 
+                animate={{
+                  opacity: isSidebarOpen ? 1 : 0,
+                  width: isSidebarOpen ? 'auto' : 0
                 }}
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
@@ -501,11 +499,10 @@ const CompanyDashboard = () => {
             whileHover={{ x: 2, transition: { duration: 0.15 } }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/settings')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${
-              window.location.pathname === '/settings'
-                ? 'bg-[#134e40] text-white shadow-md'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 relative ${window.location.pathname === '/settings'
+              ? 'bg-[#134e40] text-white shadow-md'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-[#134e40]'
+              }`}
           >
             {window.location.pathname === '/settings' && (
               <motion.div
@@ -515,10 +512,7 @@ const CompanyDashboard = () => {
             )}
             <Settings size={17} className="shrink-0" />
             <motion.span
-              animate={{ 
-                opacity: isSidebarOpen ? 1 : 0, 
-                width: isSidebarOpen ? 'auto' : 0 
-              }}
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
               transition={{ duration: 0.2 }}
               className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
@@ -526,36 +520,29 @@ const CompanyDashboard = () => {
             </motion.span>
           </motion.button>
 
-          {window.location.pathname === '/settings' && (
-            <motion.button
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ x: 2, transition: { duration: 0.15 } }}
-              whileTap={{ scale: 0.97 }}
-              onClick={async () => {
-                const isDemo = localStorage.getItem('demo_company') === 'true';
-                if (isDemo) {
-                  localStorage.removeItem('demo_company');
-                } else {
-                  await supabase.auth.signOut();
-                }
-                navigate('/signin?role=company');
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_company') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_company');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=company');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 font-bold"
+          >
+            <LogOut size={17} className="shrink-0" />
+            <motion.span
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
-              <LogOut size={17} className="shrink-0" />
-              <motion.span
-                animate={{ 
-                  opacity: isSidebarOpen ? 1 : 0, 
-                  width: isSidebarOpen ? 'auto' : 0 
-                }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
-              >
-                Sign Out
-              </motion.span>
-            </motion.button>
-          )}
+              Sign Out
+            </motion.span>
+          </motion.button>
         </div>
       </motion.aside>
 

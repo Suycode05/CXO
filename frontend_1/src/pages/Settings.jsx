@@ -443,7 +443,7 @@ const Settings = () => {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="bg-white border-r border-gray-100 flex flex-col z-50 overflow-hidden shrink-0 shadow-sm fixed left-0 top-0 h-screen"
     >
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50 justify-between">
           <motion.div
             animate={{ width: isSidebarOpen ? 'auto' : 0, opacity: isSidebarOpen ? 1 : 0 }}
             transition={{ duration: 0.2 }}
@@ -452,7 +452,7 @@ const Settings = () => {
             <div className="cursor-pointer" onClick={() => window.location.reload()}><Logo variant="dark" className="h-8" /></div>
           </motion.div>
         <motion.button
-          animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
+          animate={{ marginLeft: isSidebarOpen ? 'auto' : 'auto' }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}

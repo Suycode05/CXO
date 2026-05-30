@@ -624,7 +624,7 @@ Bio: ${expert.bio}
         </nav>
 
         {/* Separated Settings option pinned to the bottom */}
-        <div className="p-3 border-t border-gray-50">
+        <div className="p-3 border-t border-gray-50 space-y-1">
           <motion.button
             whileHover={{ x: 2, transition: { duration: 0.15 } }}
             whileTap={{ scale: 0.97 }}
@@ -651,6 +651,31 @@ Bio: ${expert.bio}
               className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
               Settings
+            </motion.span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_expert');
+                localStorage.removeItem('sb-mock-auth');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=expert');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 font-bold"
+          >
+            <LogOut size={17} className="shrink-0" />
+            <motion.span
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Sign Out
             </motion.span>
           </motion.button>
         </div>

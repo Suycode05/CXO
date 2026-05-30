@@ -15,7 +15,7 @@ import Logo from '../components/Logo';
 import FormalCardBorder from '../components/FormalCardBorder';
 import {
   LayoutDashboard, Briefcase, Activity, IndianRupee,
-  UserCircle, MessageSquare, Calendar, ChevronLeft, Menu
+  UserCircle, MessageSquare, Calendar, ChevronLeft
 } from 'lucide-react';
 
 const ExpertSettings = () => {
@@ -231,7 +231,7 @@ const ExpertSettings = () => {
             onClick={() => setIsSidebarOpen(s => !s)}
             className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#134e40] hover:bg-[#f0fdf4] transition-all shrink-0 border border-gray-200 hover:border-[#0eb59a]"
           >
-            {isSidebarOpen ? <ChevronLeft size={16} /> : <Menu size={18} strokeWidth={2.5} />}
+            {isSidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
           </motion.button>
         </div>
 
@@ -275,6 +275,31 @@ const ExpertSettings = () => {
               className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
               Settings
+            </motion.span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_expert');
+                localStorage.removeItem('sb-mock-auth');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=expert');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 font-bold"
+          >
+            <LogOut size={17} className="shrink-0" />
+            <motion.span
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
+            >
+              Sign Out
             </motion.span>
           </motion.button>
         </div>

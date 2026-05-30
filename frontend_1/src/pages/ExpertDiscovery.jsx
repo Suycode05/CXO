@@ -441,7 +441,7 @@ const ExpertDiscovery = () => {
         className="bg-white border-r border-gray-100 flex flex-col z-50 overflow-hidden shrink-0 shadow-sm fixed left-0 top-0 h-screen"
       >
         {/* Brand */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50">
+        <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-50 justify-between">
           <motion.div
             animate={{ width: isSidebarOpen ? 'auto' : 0, opacity: isSidebarOpen ? 1 : 0 }}
             transition={{ duration: 0.2 }}
@@ -450,7 +450,7 @@ const ExpertDiscovery = () => {
             <div className="cursor-pointer" onClick={() => window.location.reload()}><Logo variant="dark" className="h-8" /></div>
           </motion.div>
           <motion.button
-            animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
+            animate={{ marginLeft: isSidebarOpen ? 'auto' : 'auto' }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -521,10 +521,7 @@ const ExpertDiscovery = () => {
             )}
             <Settings size={17} className="shrink-0" />
             <motion.span
-              animate={{ 
-                opacity: isSidebarOpen ? 1 : 0, 
-                width: isSidebarOpen ? 'auto' : 0 
-              }}
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
               transition={{ duration: 0.2 }}
               className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
@@ -532,36 +529,29 @@ const ExpertDiscovery = () => {
             </motion.span>
           </motion.button>
 
-          {window.location.pathname === '/settings' && (
-            <motion.button
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ x: 2, transition: { duration: 0.15 } }}
-              whileTap={{ scale: 0.97 }}
-              onClick={async () => {
-                const isDemo = localStorage.getItem('demo_company') === 'true';
-                if (isDemo) {
-                  localStorage.removeItem('demo_company');
-                } else {
-                  await supabase.auth.signOut();
-                }
-                navigate('/signin?role=company');
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 relative font-bold text-left"
+          <motion.button
+            whileHover={{ x: 2, transition: { duration: 0.15 } }}
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              const isDemo = localStorage.getItem('demo_company') === 'true';
+              if (isDemo) {
+                localStorage.removeItem('demo_company');
+              } else {
+                await supabase.auth.signOut();
+              }
+              navigate('/signin?role=company');
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 font-bold"
+          >
+            <LogOut size={17} className="shrink-0" />
+            <motion.span
+              animate={{ opacity: isSidebarOpen ? 1 : 0, width: isSidebarOpen ? 'auto' : 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
             >
-              <LogOut size={17} className="shrink-0" />
-              <motion.span
-                animate={{ 
-                  opacity: isSidebarOpen ? 1 : 0, 
-                  width: isSidebarOpen ? 'auto' : 0 
-                }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap text-sm font-bold text-left"
-              >
-                Sign Out
-              </motion.span>
-            </motion.button>
-          )}
+              Sign Out
+            </motion.span>
+          </motion.button>
         </div>
       </motion.aside>
 

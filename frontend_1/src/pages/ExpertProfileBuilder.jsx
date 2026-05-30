@@ -11,7 +11,7 @@ import {
   X, ChevronDown, ChevronUp, Building, GraduationCap,
   TrendingUp, Zap, BookOpen, FileText, AlertCircle,
   Mail, Phone, ExternalLink,
-  LayoutDashboard, Bell, ChevronLeft, Menu, LogOut, UserCircle, Activity, MessageSquare, Settings
+  LayoutDashboard, Bell, ChevronLeft, LogOut, UserCircle, Activity, MessageSquare, Settings
 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -589,25 +589,13 @@ const ExpertProfileBuilder = () => {
             </div>
           </motion.div>
           <motion.button
-            whileHover={{ scale: 1.1, 
-              backgroundColor: '#f0fdf4' }}
+            animate={{ marginLeft: isSidebarOpen ? 'auto' : 0 }}
+            whileHover={{ scale: 1.1, backgroundColor: '#f0fdf4' }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsSidebarOpen(s => !s)}
-            className={`w-8 h-8 rounded-xl bg-gray-100 
-              flex items-center justify-center 
-              text-[#134e40] hover:bg-[#f0fdf4] 
-              transition-all cursor-pointer shrink-0 
-              border border-gray-200 
-              hover:border-[#0eb59a]
-              ${isSidebarOpen ? 'ml-auto' : 'ml-2'}`}
+            className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-[#134e40] hover:bg-[#f0fdf4] transition-all cursor-pointer shrink-0 border border-gray-200 hover:border-[#0eb59a]"
           >
-            {isSidebarOpen
-              ? <ChevronLeft size={16} 
-                  className="text-[#134e40]" />
-              : <Menu size={18} 
-                  className="text-[#134e40]"
-                  strokeWidth={2.5} />
-            }
+            {isSidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
           </motion.button>
         </div>
 
