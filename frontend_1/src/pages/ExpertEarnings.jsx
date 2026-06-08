@@ -49,7 +49,7 @@ const ExpertEarnings = () => {
   // ── AUTH GUARD ──
   useEffect(() => {
     const checkAuth = async () => {
-      const isDemo = localStorage.getItem('demo_expert') === 'true';
+      const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
       if (isDemo) {
         setExpertProfile({ full_name: 'David Chen' });
         return;

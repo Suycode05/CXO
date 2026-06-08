@@ -49,7 +49,7 @@ const ExpertContracts = () => {
 
   // Authentication Guard (Expert specific)
   useEffect(() => {
-    const isDemo = localStorage.getItem('demo_expert') === 'true';
+    const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
 
     const checkAuth = async () => {
       if (isDemo) {

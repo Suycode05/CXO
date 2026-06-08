@@ -1,4 +1,28 @@
 import { supabaseAdmin } from "../utils/supabaseAdmin.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dataDir = path.resolve(__dirname, "../data");
+const jsonPath = path.join(dataDir, "notifications.json");
+
+async function readJsonNotifications() {
+  try {
+    const content = await fs.readFile(jsonPath, "utf-8");
+    return JSON.parse(content);
+  } catch (err) {
+    return [];
+  }
+}
+
+async function writeJsonNotifications(data) {
+  try {
+    await fs.writeFile(jsonPath, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Error writing notifications.json:", err);
+  }
+}
 
 // Fetch notifications for the logged-in user
 export const getNotifications = async (req, res) => {
@@ -6,6 +30,11 @@ export const getNotifications = async (req, res) => {
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
+  }
+
+  if (userId === "00000000-0000-0000-0000-000000000000") {
+    const list = await readJsonNotifications();
+    return res.json(list);
   }
 
   try {
@@ -36,6 +65,25 @@ export const markAsRead = async (req, res) => {
     return res.status(400).json({ error: "User ID and notification ID are required" });
   }
 
+  if (userId === "00000000-0000-0000-0000-000000000000") {
+    try {
+      const list = await readJsonNotifications();
+      let updatedNotif = null;
+      const updatedList = list.map(n => {
+        if (n.id === id) {
+          updatedNotif = { ...n, is_read: true };
+          return updatedNotif;
+        }
+        return n;
+      });
+      await writeJsonNotifications(updatedList);
+      return res.json({ success: true, notification: updatedNotif });
+    } catch (err) {
+      console.error("Error marking local notification as read:", err);
+      return res.status(500).json({ error: "Failed to update notification status" });
+    }
+  }
+
   try {
     const { data, error } = await supabaseAdmin
       .from("notifications")
@@ -58,6 +106,19 @@ export const markAllAsRead = async (req, res) => {
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" });
+  }
+
+  if (userId === "00000000-0000-0000-0000-000000000000") {
+    try {
+      const list = await readJsonNotifications();
+      const count = list.filter(n => !n.is_read).length;
+      const updatedList = list.map(n => ({ ...n, is_read: true }));
+      await writeJsonNotifications(updatedList);
+      return res.json({ success: true, count });
+    } catch (err) {
+      console.error("Error marking all local notifications as read:", err);
+      return res.status(500).json({ error: "Failed to update notifications" });
+    }
   }
 
   try {

@@ -258,7 +258,7 @@ const ExpertEngagements = () => {
   // Profile fetch effect (keep exactly)
   useEffect(() => {
     const fetchProfile = async () => {
-      const isDemo = localStorage.getItem('demo_expert') === 'true';
+      const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
       if (isDemo) {
         setProfile({ full_name: 'David Chen' });
         return;

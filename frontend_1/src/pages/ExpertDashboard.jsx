@@ -74,6 +74,14 @@ const ExpertDashboard = () => {
 
   useEffect(() => {
     const checkAuthAndFetch = async () => {
+      const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+      if (isDemo) {
+        setProfile({ full_name: 'David Chen', key_skills: ['Financial Modeling', 'Investor Relations'] });
+        setRecommendedOpportunities(MOCK_RECOMMENDED_OPPORTUNITIES);
+        setLoadingProfile(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/signin?role=expert');
@@ -219,6 +227,23 @@ const ExpertDashboard = () => {
   const handleToggleAvailability = async () => {
     const nextAvailable = !isAvailable;
     setIsAvailable(nextAvailable);
+
+    const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+    if (isDemo) {
+      if (profile) {
+        setProfile({
+          ...profile,
+          engagement_types: {
+            ...profile.engagement_types,
+            availability: {
+              ...profile.engagement_types?.availability,
+              status: nextAvailable ? 'Available' : 'Not available'
+            }
+          }
+        });
+      }
+      return;
+    }
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;

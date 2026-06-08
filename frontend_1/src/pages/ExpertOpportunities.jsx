@@ -402,7 +402,7 @@ const ExpertOpportunities = () => {
   // Auth check and profile/opportunities fetch
   useEffect(() => {
     const checkAuthAndFetch = async () => {
-      const isDemo = localStorage.getItem('demo_expert') === 'true';
+      const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
       if (isDemo) {
         setProfile({ full_name: 'David Chen' });
         setOpportunities(MOCK_OPPORTUNITIES);

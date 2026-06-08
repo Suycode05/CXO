@@ -17,6 +17,7 @@ const SignIn = () => {
 		if (isExpertMock || isCompanyDemo) {
 			localStorage.removeItem("sb-mock-auth");
 			localStorage.removeItem("demo_company");
+			localStorage.removeItem("demo_expert");
 			localStorage.removeItem("mock-role");
 			// Force a hard reload to re-initialize the Supabase client
 			window.location.reload();
@@ -162,6 +163,7 @@ const SignIn = () => {
 				const cleanIdentifier = identifier.trim();
 				if (cleanIdentifier === "demo@cxo.com") {
 					localStorage.setItem("sb-mock-auth", "true");
+					localStorage.setItem("demo_expert", "true");
 					localStorage.setItem("mock-role", "expert");
 					localStorage.setItem('user_role', 'expert');
 					localStorage.removeItem('demo_company');

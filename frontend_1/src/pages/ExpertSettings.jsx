@@ -139,6 +139,9 @@ const ExpertSettings = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const isDemo = localStorage.getItem('sb-mock-auth') === 'true' || localStorage.getItem('demo_expert') === 'true';
+      if (isDemo) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       try {

@@ -231,6 +231,9 @@ const ExpertProfileBuilder = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+      if (isDemo) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
@@ -300,6 +303,13 @@ const ExpertProfileBuilder = () => {
   }, []);
 
   const handleSave = async (overrideExperiences, overrideEducation, overrideIndustries, overrideEngagementTypes, overrideSkills) => {
+    const isDemo = localStorage.getItem('demo_expert') === 'true' || localStorage.getItem('sb-mock-auth') === 'true';
+    if (isDemo) {
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       alert("Please sign in first");
